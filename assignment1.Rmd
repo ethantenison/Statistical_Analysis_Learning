@@ -1,0 +1,47 @@
+---
+title: "Single and Multiple Regression"
+author: "Ethan Tenison"
+date: "2/4/2020"
+output: html_document
+---
+
+# Interaction Effects 
+
+### (a)Write an equation to specify a linear regression model for this problem. You will need to create/define variables.What is the unit of analysis? 
+
+$\hat{y}$ = $\beta_{0}$ + $\beta_{s}$$X_{s}$ + $\beta_{m}$$X_{m}$ + $\varepsilon$
+
+$\hat{y}$ = the estimated property value <br />
+$\beta_{0}$ = intercept <br />
+$\beta_{s}$ = coefficient for single-family home <br />
+$X_{s}$ = dummy variable that is 1 for single-family and 0 for not <br />
+$\beta_{m}$ = coefficient for multi-unit home <br />
+$X_{m}$ = dummy variable that is 1 for multi-unit and 0 for not <br />
+$\varepsilon$ = the error term <br />
+<br />
+The unit of analysis is property value in the neighborhood 
+
+
+### (b)Interpret the coefficients in the equation from (a).
+The coefficients represent on average how much being a permitted single-family and/or multi-unit neighborhood has on property value. 
+
+### (c)For all of the possible combinations of “states” of predictor variables, give estimates for property values.
+Single-Family only: $\hat{y}$ = $\beta_{0}$ + $\beta_{s}$$(1)$ +  $\beta_{m}$$(0)$ +$\varepsilon$ <br />
+Multi-unit only: $\hat{y}$ = $\beta_{0}$ + $\beta_{s}$$(0)$ +  $\beta_{m}$$(1)$ +$\varepsilon$ <br />
+Both:  $\hat{y}$ = $\beta_{0}$ + $\beta_{s}$$(1)$ +  $\beta_{m}$$(1)$ +$\varepsilon$ 
+
+### (d)What is the expected difference between single-family YES multi-unit NO neighborhood and a single-family YES multi-unit YES neighborhood?
+($\beta_{0}$ + $\beta_{s}$$(1)$ +  $\beta_{m}$$(1)$ +$\varepsilon$) - ($\beta_{0}$ + $\beta_{s}$$(1)$ +  $\beta_{m}$$(0)$ +$\varepsilon$) <br />
+=  $\beta_{m}$$(1)$
+
+### (e)Does allowing multi-unit housing in single-family neighborhoods cause property values to change? Why or why not?
+It depends on the coefficient. Is it statistically different from zero or not? If it is, than adding multi-unit housing to a single-family neighborhood could (on average) increase or decrease property value. 
+
+### (f)To provide the best possible information to the council, what might you –as an analyst –need? What might ruin your findings?
+In order to construct a good model I would need data on all the relevant predictors of property value. For example, the existence of a park in the neighborhood might have an impact. The findings might be ruined if the model leaves out some important predictor variable like the location of the neighborhood within the city. Neighborhoods in Mt.Bonnel are going to have a higher property value than on Rundberg regardless of whether it's a single-family or multi-unit neighborhood. 
+```{r Interation_Effects}
+
+
+```
+
+
