@@ -193,10 +193,21 @@ summary(model)
 
 ### (f) Now fit a polynomial regression model that predicts y using x and x2. Is there evidence that the quadratic term improves the model fit? Explain your answer.
 
+```{r polynomial}
+set.seed(20)
+
+```
 
 
 ### (g) Repeat (a)–(f) after modifying the data generation process in such a way that there is less noise in the data. The model should remain the same. You can do this by decreasing the variance of the normal distribution used to generate the error term ε in Describe your results.
 
+```{r less_noise}
+
+
+
+
+
+```
 
 
 
