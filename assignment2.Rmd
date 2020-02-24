@@ -1,0 +1,59 @@
+---
+title: 'Assignment 2: Classification'
+author: "Ethan Tenison"
+date: "2/24/2020"
+output: html_document
+---
+
+# Q1: Classification 
+
+Residential solar photovoltaics (PV) – the roof-mounted panels that generate electricity – are spreading
+throughout Austin. Two key drivers of the individual adoption decision are Wealth in K$, and Attitude on
+a scale beween 1-4. Suppose you collect data on a group of Austin homeowners where $X_{1}$ = Wealth in
+kdollars $X_{2}$ = Attitude, and Y = whether homeowners adopt solar PV. We fit a logistic regression and produce
+estimated coefficients β0 = −6, β1 = 0.05, and β2 = 1.<br />
+
+
+#### (a) Write out the function.
+
+
+$log$$\frac{p}{(1-p)}$ = $-6$ + $0.05$$X_{1}$ + $1$$X_{2}$
+
+#### (b) Estimate the probability that a homeowner with Wealth of $40k and an Attitude of 3.5 adopts
+ solar PV.
+
+$log$$\frac{p}{(1-p)}$ = $-6$ + $0.05$$(40)$ + $1$$(3.5)$  <br />
+$log$$\frac{p}{(1-p)}$ = $-6$ + $2$ + $3.5$  <br />
+$log$$\frac{p}{(1-p)}$ = $-0.5$   <br />
+$\frac{p}{(1-p)}$ = $exp$$(-0.5)$  <br />
+$\frac{p}{(1-p)}$ = $0.60653065971$ <br />
+$p$ = $\frac{0.60653065971}{(1+0.60653065971)}$ <br />
+$p$ = $37.8$%
+
+#### (c) What Wealth value would the homeowner in part (b) need to have in order to have a 50%
+ chance of adopting solar PV?
+
+$log$$\frac{0.5}{(1-0.5)}$ = $-6$ + $0.05$$X_{1}$ + $1$$(3.5)$ <br />
+$log$$(1)$ = $-6$ + $0.05$$X_{1}$ + $1$$(3.5)$<br />
+$0$ = $-6$ + $0.05$$X_{1}$ + $1$$(3.5)$<br />
+$2.5$ = $0.05$$X_{1}$<br />
+$X_{1}$ = $50K$<br />
+
+#### (d) What if you added a qualitative variable Tesla_Owner as X3, that indicated whether the
+ household owns a Tesla plug-in electric car. Tesla cars are quite expensive, and those with solar
+ PV systems benefit considerably from not paying for fuel. Write out the new function. What
+ value might you expect for new Tesla_Owner coefficient (β3) in this new function? How might
+ you expect β1 and β2 in the NEW function to be different from β1 and β2 in the OLD function?
+ <br /><br />
+ 
+$\beta_{3}$ will probably be much larger than $\beta_{1}$ and $\beta_{2}$ because Tesla owners benefit from photovoltaics. The value for $\beta_{1}$ will probably decrease slightly because wealth is correlated with owning a Tesla, and some variation previously assigned to $\beta_{1}$ will be included in $\beta_{3}$. It is unlikely that $\beta_{2}$ will change because attitude towards photovoltacics might not be associated with Tesla ownership. 
+
+#### (e) What is missing from this (admittedly simplified) analysis?
+
+We might include an interaction variable for $X_{1}$ and $X_{3}$. You might also want to include a variable for tax rebates. Not all homeowners may qualify, and that could have a big impact on their decision. Another variable that might be important is the avg price of PV panels, which have been declining.    
+
+
+ 
+```{r}
+
+```
