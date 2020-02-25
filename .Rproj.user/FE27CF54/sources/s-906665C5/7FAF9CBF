@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1582669897682.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "7FAF9CBF",
+    "lastKnownWriteTime" : 1,
+    "last_content_update" : 1582669897682,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "id" : "21c0b5e15b3b4745861b07a7167f60f1",
+        "name" : "lda_predict",
+        "title" : "lda_predict"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "object_explorer"
+}

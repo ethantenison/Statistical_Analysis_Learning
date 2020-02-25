@@ -69,7 +69,7 @@ df$year <- substr(df$year_month, 1, 4)
 df$year <- as.numeric(df$year)
 df$month <- substr(df$year_month, 5, 6)
 df$month <- as.factor(df$month)
-df <- select(df, -c(year_month))
+df <- dplyr::select(df, -c(year_month))
 df$customer_class <- gsub(" - ", "_", df$customer_class)
 df <- filter(df, postal_code != "")
 df$total_gallons[is.na(df$total_gallons)] <- 0
@@ -121,7 +121,7 @@ for (i in 1:length(logdf$irrigation_residential)){
 }
 set.seed(88)
 split = sample.split(logdf$HiResIrr, SplitRatio = 0.75)
-logdf <- select(logdf, -c(irrigation_residential, postal_code))
+logdf <- dplyr::select(logdf, -c(irrigation_residential, postal_code))
 train = subset(logdf, split == TRUE)
 test = subset(logdf, split == FALSE)
 
@@ -168,18 +168,20 @@ for (i in 1:length(dfknn$irrigation_residential)){
 }
 
 set.seed(88)
-dfknn <- select(dfknn, -c(irrigation_residential, postal_code))
+dfknn <- dplyr::select(dfknn, -c(irrigation_residential, postal_code))
 dmy <- dummyVars(" ~ .", data = dfknn)
 dfknn <- data.frame(predict(dmy, newdata = dfknn))
 split = sample.split(dfknn$HiResIrr, SplitRatio = 0.8)
 train_knn = subset(dfknn, split == TRUE)
-train_labels = train[["HiResI
-                      rr"]]
+train_labels = train_knn[["HiResIrr"]]
+train_knn[is.na(train_knn)] <- 0
+
 test_knn = subset(dfknn, split == FALSE)
-test_labels = test[["HiResIrr"]]
+test_labels = test_knn[["HiResIrr"]]
+test_knn[is.na(test_knn)] <- 0
 
 
-dfknn_prediction = class::knn(train= train_knn, test = test_knn, cl= train_labels, k = 4)
+dfknn_prediction = class:knn(train= train_knn, test = test_knn, cl= train_labels, k = 4)
 CrossTable(x= test_labels, y= dfknn_prediction, chisq = FALSE)
 ```
 
@@ -187,29 +189,37 @@ CrossTable(x= test_labels, y= dfknn_prediction, chisq = FALSE)
 predictors. What is the test error of the model obtained? Comment on the sensitivity and
 specificity. <br /><br />
 
-The overall test error is $0.1540418$.The Sensitivity of the LDA function is low at $0.3017945$, but the specificity is high at $0.96$.  
+The overall test error is $0.164557$.The Sensitivity of the LDA function is high at $0.9530$, but the specificity is low at $0.2760$.  
 
-```{r LDA}
+```{r LDA, message=FALSE, warning=FALSE}
 library(MASS)
 
-fit <- lda(HiResIrr ~ year + irrigation_multi_family + multi_family + residential, data=train, CV=TRUE)
+fit <- lda(HiResIrr ~ year + irrigation_multi_family + multi_family + residential, data=train)
 
-ct <- table(train$HiResIrr, fit$class)
-diag(prop.table(ct, 1))
-sum(diag(prop.table(ct)))
+pred.train <- predict(fit,train)$class
+pred.test <- predict(fit,test)$class
+
+mean(pred.train == train$HiResIrr)
+mean(pred.test == test$HiResIrr)
+
+confusionMatrix(pred.test, reference = as.factor(test$HiResIrr))
 
 ```
 
 #### (f) Perform QDA on the training data in order to predict HiResIrr using all the variables from (b) as
 predictors. What is the test error of the model obtained?<br /><br />
 
-The test error for the QDA function was slightly higher than LDA at $0.1599774$
+The test error for the QDA function was slightly higher than LDA at $0.1708861$
 ```{r QDA}
-fit <- qda(HiResIrr ~ year + irrigation_multi_family + multi_family + residential, data=train, CV=TRUE)
+fit <- qda(HiResIrr ~ year + irrigation_multi_family + multi_family + residential, data=train)
 
-ct <- table(train$HiResIrr, fit$class)
-diag(prop.table(ct, 1))
-sum(diag(prop.table(ct)))
+pred.train <- predict(fit,train)$class
+pred.test <- predict(fit,test)$class
+
+mean(pred.train == train$HiResIrr)
+mean(pred.test == test$HiResIrr)
+
+confusionMatrix(pred.test, reference = as.factor(test$HiResIrr))
 ```
 
 # Q3: Classification in simulated data (20 points)<br /><br />
@@ -262,11 +272,19 @@ require(ggplot2)
 require(scales)
 require(gridExtra)
 
-fit <- lda(class ~ x1 + x2, data=df, CV=TRUE)
+set.seed(88)
+split = sample.split(df, SplitRatio = 0.75)
+train = subset(df, split == TRUE)
+test = subset(df, split == FALSE)
 
-ct <- table(df$class, fit$class)
-diag(prop.table(ct, 1))
-sum(diag(prop.table(ct)))
 
+fit <- lda(class ~ x1 + x2, data=train)
+pred <- predict(fit, test)$class
+ggplot(data = test, aes(x1, x2, color=pred)) + geom_point()
+ggplot(data = test, aes(x1,x2, color=class)) + geom_point()
+
+ldacorrect = mean(pred == df$class)
+ldaerror = 1- ldacorrect
+ldaerror
 
 ```

@@ -11,7 +11,7 @@
 "0","}"
 "0","set.seed(88)"
 "0","split = sample.split(logdf$HiResIrr, SplitRatio = 0.75)"
-"0","logdf <- select(logdf, -c(irrigation_residential, postal_code))"
+"0","logdf <- dplyr::select(logdf, -c(irrigation_residential, postal_code))"
 "0","train = subset(logdf, split == TRUE)"
 "0","test = subset(logdf, split == FALSE)"
 "0",""
