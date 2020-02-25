@@ -1,0 +1,7 @@
+"0","library(dplyr)"
+"0","library(janitor)"
+"0",""
+"0","df <- read.csv(""austin_house_price.csv"")"
+"0","df <- clean_names(df)"
+"0","a <- select(df, sale_price, garage_cars, age, overall_qual, overall_cond)"
+"0","pairs(a, )"

@@ -1,0 +1,257 @@
+---
+title: "Assignment 1: Single and Multiple Regression"
+author: "Ethan Tenison"
+date: "2/4/2020"
+output: html_document
+---
+
+# Q1: Interactioneffects in a linear regression 
+
+
+### (a)Write an equation to specify a linear regression model for this problem. You will need to create/define variables.What is the unit of analysis? 
+
+$\hat{y}$ = $\beta_{0}$ + $\beta_{s}$$X_{s}$ + $\beta_{m}$$X_{m}$ + $\varepsilon$
+
+$\hat{y}$ = the estimated property value <br />
+$\beta_{0}$ = intercept <br />
+$\beta_{s}$ = coefficient for single-family home <br />
+$X_{s}$ = dummy variable that is 1 for single-family and 0 for not <br />
+$\beta_{m}$ = coefficient for multi-unit home <br />
+$X_{m}$ = dummy variable that is 1 for multi-unit and 0 for not <br />
+$\varepsilon$ = the error term <br />
+<br />
+The unit of analysis is property value of the neighborhood 
+ <br />
+<br />
+<br />
+
+
+### (b)Interpret the coefficients in the equation from (a).
+The coefficients represent, all things being equal, how much being a permitted single-family and/or multi-unit neighborhood has on property value. The $\beta_{0}$ represents the intercept when a neighborhood is neither permitted to be a single-family or multi-unit area. $\beta_{s}$ is the coefficient for the dummy variable for single-family neighborhood. $\beta_{m}$ is the coefficient for the dummy variable for multi-unit neighborhood. $\varepsilon$ is the disturbance term that contains all of the reducivle and irreducivle error. 
+
+<br />
+<br />
+<br />
+
+
+### (c)For all of the possible combinations of “states” of predictor variables, give estimates for property values.
+Single-Family only: $\hat{y}$ = $\beta_{0}$ + $\beta_{s}$$(1)$ +  $\beta_{m}$$(0)$ +$\varepsilon$ <br />
+Multi-unit only: $\hat{y}$ = $\beta_{0}$ + $\beta_{s}$$(0)$ +  $\beta_{m}$$(1)$ +$\varepsilon$ <br />
+Both:  $\hat{y}$ = $\beta_{0}$ + $\beta_{s}$$(1)$ +  $\beta_{m}$$(1)$ +$\varepsilon$ 
+<br />
+<br />
+<br />
+
+### (d)What is the expected difference between single-family YES multi-unit NO neighborhood and a single-family YES multi-unit YES neighborhood?
+($\beta_{0}$ + $\beta_{s}$$(1)$ +  $\beta_{m}$$(1)$ +$\varepsilon$) - ($\beta_{0}$ + $\beta_{s}$$(1)$ +  $\beta_{m}$$(0)$ +$\varepsilon$) <br />
+=  $\beta_{m}$$(1)$
+
+<br />
+<br />
+<br />
+
+### (e)Does allowing multi-unit housing in single-family neighborhoods cause property values to change? Why or why not?
+It depends on the coefficient. Is it statistically different from zero or not? If it is, than adding multi-unit housing to a single-family neighborhood could (on average) increase or decrease property value. 
+<br />
+<br />
+<br />
+
+
+### (f)To provide the best possible information to the council, what might you –as an analyst –need? What might ruin your findings?
+In order to construct a good model I would need data on all the relevant predictors of property value. For example, the existence of a park in the neighborhood might have an impact. The findings might be ruined if the model leaves out some important predictor variable like the location of the neighborhood within the city. Neighborhoods in Mt.Bonnel are going to have a higher property value than on Rundberg regardless of whether it's a single-family or multi-unit neighborhood. There may also be a problem with your results if the there is interaction between the two. Other potential problems are multicolinearity, observations with high-leverage, outliers, non-constant variance of the error terms, correlation of the error terms, and non-linearity.
+<br />
+<br />
+<br />
+
+# Q2: Applying Multiple Linear Regressionto data.
+
+### (a)Produce a scatterplot matrix which includes the variables SalePrice, GarageCars, Age, OverallQual, and OverallCond.Circle any relationship that appears to be non-linear. 
+```{r Interation_Effects, message=FALSE}
+library(dplyr)
+library(janitor)
+
+df <- read.csv("austin_house_price.csv")
+df <- clean_names(df)
+a <- select(df, sale_price, garage_cars, age, overall_qual, overall_cond)
+pairs(a, )
+
+
+```
+
+### (b)Compute the matrix of correlations between the variablesSalePrice, GarageCars, Age, OverallQual, and OverallCond. Between which 2 variables is the highest correlation?
+The two variables with the highest correlation are overall_qual and sale_price at 0.79098160
+```{r matrix_correlation}
+b = cor(a)
+b
+
+```
+
+### (c) Perform a multiple linear regression with SalePrice as the response and other variables as the predictors. Use as many variables as you need to improve the model and justify your decision. Is there a relationship between the predictors and the response? What does the coefficient for the age variable suggest? 
+
+I included all of the variables except tot_rms_abv_grd because that would have double counted rooms. All of them were significant at the 95% level except for age and bsmt_half_bath. The p-value for age was higher than .2, which tells us that we can't rule out the possibility that age has zero impact on property value. Additionally, removing age from the model only changes the adj r squared by .0001
+
+```{r mult_regression}
+
+ 
+
+c = lm(sale_price ~ garage_cars + age + overall_qual + overall_cond + bsmt_full_bath + bsmt_half_bath + full_bath + half_bath + bedroom_abv_gr + kitchen_abv_gr + fireplaces, data=df)
+summary(c)
+
+```
+
+
+
+### (d) Include the variable Age as a predictor in your model. Try a few different transformations of the Age variable, such as log(X), √X, X2. Comment on your findings.
+
+Both log and sqrt produced significant results. The log transformation worked best. Squaring age did not lead to significants. 
+
+```{r transforming_age}
+d = df
+d = filter(d, age != 0)
+d = lm(sale_price ~ garage_cars + log(age) + overall_qual + overall_cond + bsmt_full_bath + bsmt_half_bath + full_bath + half_bath + bedroom_abv_gr + kitchen_abv_gr + fireplaces, data=d,)
+print(summary(d))
+
+
+dd = df
+dd = filter(dd, age != 0)
+dd = lm(sale_price ~ garage_cars + sqrt(age) + overall_qual + overall_cond + bsmt_full_bath + bsmt_half_bath + full_bath + half_bath + bedroom_abv_gr + kitchen_abv_gr + fireplaces, data=dd,)
+print(summary(dd))
+
+
+```
+
+### (e) Summarize what you know now about Austin home prices and garages.
+
+The variables that have the greatest impact on property value are its overal quality, whether it has full bathrooms, and fire places. Based on the model, kitches actually have a negative impact on the property value, but this might be because properties without kitchens are probably businesses.The age of a property has virtually no impact on property value. This might be because homes are renovated and people value historic properties.   
+
+# Q3. Simple Linear Regressionson simulated data.
+
+
+### (a)Create a vector, x, containing 100 observations drawn from a N (0, 1) distribution. This represents a feature: X.
+
+
+```{r vectorx}
+set.seed(124)
+
+x <- rnorm(100, 0, 1)
+x
+
+```
+
+
+### (b)Create another vector, eps, containing 100 observations drawn from a N(0,0.25) distribution i.e. a normal distribution with mean zero and variance 0.25
+
+```{r eps}
+
+
+eps <- rnorm(100, 0, 0.25)
+eps
+
+
+```
+
+### (c) Using x and eps, generate a vector y according to the model Y =−1+0.5X+ε. What is the length of the vector y? What are the values of β0 and β1 in this linear model?
+
+The length of the vector y is 100. β0 is equal to -1 and β1 is equal to 0.5
+```{r y}
+
+y <- (-1 + 0.5*x + eps)
+y
+
+
+
+```
+
+
+
+### (d)Create a scatterplot displaying the relationship between x and y. Comment on what you observe.
+
+X appears to be strongly correlated with y. 
+```{r scatter}
+
+plot(x, y, main="Scatterplot displaying the relationship between x and y",
+   xlab="X", ylab="Y", pch=19)
+
+
+```
+
+
+
+### (e)Fit a least squares linear model to predict y using x. Comment on the model obtained. How do βˆ0 and βˆ1 compare to β0 and β1?
+Both βˆ0 and βˆ1 are approximately 1.5 compared to -1 and 0.5 for  β0 and β1
+
+```{r lm}
+
+df <- data.frame(x,y)
+
+model <- lm(y~x, data = df)
+summary(model)
+
+
+
+```
+
+### (f) Now fit a polynomial regression model that predicts y using x and x2. Is there evidence that the quadratic term improves the model fit? Explain your answer.
+
+<<<<<<< HEAD
+```{r polynomial}
+set.seed(20)
+
+```
+=======
+Adding a quadratic to this model only increases the r squared slightly. This might be because x and y already have a strong correlation. 
+
+```{r polynomial_reg}
+
+model <- lm(y ~ poly(x,2), data = df)
+summary(model)
+
+
+
+```
+
+>>>>>>> 04438b5dd0b3545a37b55007af29aab29bdf3f56
+
+
+### (g) Repeat (a)–(f) after modifying the data generation process in such a way that there is less noise in the data. The model should remain the same. You can do this by decreasing the variance of the normal distribution used to generate the error term ε in Describe your results.
+
+<<<<<<< HEAD
+```{r less_noise}
+
+
+
+
+
+```
+=======
+The adj r squared jumps to 97%
+```{r less_noise}
+
+x <- rnorm(100, 0, 1)
+x
+>>>>>>> 04438b5dd0b3545a37b55007af29aab29bdf3f56
+
+eps <- rnorm(100, 0, 0.1)
+eps
+
+y <- (-1 + 0.5*x + eps)
+y
+
+plot(x, y, main="Relationship between x and y (less noise)",
+   xlab="X", ylab="Y", pch=19)
+
+df <- data.frame(x,y)
+
+model <- lm(y~x, data = df)
+print(summary(model))
+
+model <- lm(y ~ poly(x,2), data = df)
+print(summary(model))
+
+
+```
+
+
+
+
+

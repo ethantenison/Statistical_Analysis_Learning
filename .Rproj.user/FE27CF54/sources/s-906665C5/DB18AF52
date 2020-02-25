@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1582662922319.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "DB18AF52",
+    "lastKnownWriteTime" : 1582662932,
+    "last_content_update" : 1582662932201,
+    "path" : "~/Desktop/Statistical_Analysis_Learning/.gitignore",
+    "project_path" : ".gitignore",
+    "properties" : {
+        "cursorPosition" : "0,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "gitignore"
+}
