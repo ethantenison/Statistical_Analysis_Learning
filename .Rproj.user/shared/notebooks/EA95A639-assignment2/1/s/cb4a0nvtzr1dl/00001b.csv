@@ -1,8 +1,0 @@
-"0",""
-"0","ldacorrect = mean(pred == df$class)"
-"0","ldaerror = 1- ldacorrect"
-"0","ldaerror"
-"1","[1]"
-"1"," 0.652"
-"1","
-"

@@ -1,9 +1,12 @@
 ---
 title: 'Assignment 2: Classification'
 author: "Ethan Tenison"
-date: "2/24/2020"
-output: html_document
+date: "2/26/2020"
+output:
+  word_document: default
+  pdf_document: default
 ---
+
 
 # Q1: Classification 
 
@@ -181,7 +184,7 @@ test_labels = test_knn[["HiResIrr"]]
 test_knn[is.na(test_knn)] <- 0
 
 
-dfknn_prediction = class:knn(train= train_knn, test = test_knn, cl= train_labels, k = 4)
+dfknn_prediction = class::knn(train= train_knn, test = test_knn, cl= train_labels, k = 4)
 CrossTable(x= test_labels, y= dfknn_prediction, chisq = FALSE)
 ```
 

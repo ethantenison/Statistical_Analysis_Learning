@@ -1,24 +1,25 @@
 {
     "collab_server" : "",
     "contents" : "",
-    "created" : 1582649295984.000,
+    "created" : 1582728931293.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2507562095",
-    "id" : "B680B4C2",
+    "hash" : "0",
+    "id" : "CF0970B6",
     "lastKnownWriteTime" : 1582729108,
-    "last_content_update" : 1582729110232,
+    "last_content_update" : 1582729108833,
     "path" : "~/Desktop/Statistical_Analysis_Learning/assignment2.Rmd",
     "project_path" : "assignment2.Rmd",
     "properties" : {
-        "cursorPosition" : "290,3",
-        "scrollLine" : "1"
+        "cursorPosition" : "157,0",
+        "scrollLine" : "135",
+        "tempName" : "Untitled1"
     },
     "read_only" : false,
     "read_only_alternatives" : [
     ],
-    "relative_order" : 3,
+    "relative_order" : 8,
     "source_on_save" : false,
     "source_window" : "",
     "type" : "r_markdown"
