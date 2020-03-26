@@ -1,0 +1,140 @@
+---
+title: "Assignment 3"
+author: "Ethan Tenison"
+date: "3/20/2020"
+output: word_document
+---
+
+# Q1: Samples and Resampling (40 points)
+In Question 2 on Assignment 2, we used the validation set approach to model assessment and selection. 
+
+### (a) How many observations were in the sample? In the training set? In the test set? How many
+### training sets were there? How many test sets? What are strengths and weaknesses of this
+### approach?
+
+There were 4,422 observations in the dataset from assignment 2, and I used two test/training sets. There were 3316 obs in the training and 1106 in the test in the firest with a 75% split. FOr the KNN classifier 3538 and 884 using a 80% 20% split. 
+
+<br />
+
+The validation approach is simple and easy, but your estimates can have a lot of variation depending on what is inside your training/test set. 
+
+###Suppose we had used LOOCV instead of the validation set approach.
+###(b) How many observations would there have been in the training set? In the test set? How many
+###training sets would there have been? How many test sets? What are strengths and weaknesses
+###of this approach?
+
+With LOOCV there would be 4421 observations in training and 1 in test, but there would be 4422 train/test sets. The main advantage is that you will have less bias because n-1 observations are in your training set, but it is computational expensives. You wouldn't want to use this if you have millions of observations. 
+
+### Now suppose we had used k-fold cross-validation instead of the validation set approach.
+### (c) How many observations would there have been in the training set? In the test set? How many
+### training sets would there have been? How many test sets? What are strengths and weaknesses
+### of this approach?
+
+It all depends on how many folds you select. 5 K-fold validation would split the data into 5 random sets of approximately the same size. The biggest appeal for kfold is its speed. It's less computationally intensive, but there is more bias. Increasing the number of folds reduces bias close to LOOCV. 
+
+###Now suppose we had used bootstrapping instead of the validation set approach.
+###(d) How many observations would there have been in the training set? In the test set? How many
+###training sets would there have been? How many test sets? What are strengths and weaknesses
+###of this approach?
+
+The number of observations is randomly assigned in the bootstrap method. The total number of bootstrap samples depends on how much variance is in your statistics. If there is high variance, you might want more samples than if the variance was low. 
+
+<br /><br />
+
+# Q2: Resampling in data (40 points)
+
+
+```{r data_cleaning, message = FALSE, warning = FALSE}
+library(reshape2)
+library(readr)
+library(janitor)
+library(dplyr)
+
+water <- read_csv("Austin_Water_-_Residential_Water_Consumption.csv")
+water <- clean_names(water)
+water$customer_class <- gsub(" - ", "_", water$customer_class)
+water$customer_class <- gsub("-", "_", water$customer_class)
+water$year <- as.numeric(substr(water$year_month, 1, 4))
+water$month <- as.numeric(substr(water$year_month, 5, 6))
+water <- water[water$postal_code != "", ]
+water <- na.omit(water)
+water <- as.data.frame(aggregate(data=water, total_gallons~customer_class+year+postal_code, sum))
+water <- water[water$year == 2014,]
+water$hi_use <- 0
+water$hi_use[water$total_gallons > mean(water$total_gallons)] = 1
+water$zip_code <- water$postal_code
+
+houses <- read_csv("2014_Housing_Market_Analysis_Data_by_Zip_Code.csv")
+houses <- clean_names(houses)
+atx <- merge(water, houses, by="zip_code", all.x=TRUE)
+
+```
+
+
+###(a) Split the data into a training set (80%) and a test set (20%). Produce summary statistics of the
+###variable HiUse for the training and test sets separately.
+
+```{r split}
+library(caTools)
+
+set.seed(5)
+split = sample.split(atx$hi_use, SplitRatio = 0.80)
+train = subset(atx, split == TRUE)
+test = subset(atx, split == FALSE)
+
+print(summary(train$hi_use))
+print(summary(test$hi_use))
+```
+
+
+###(b) Fit a multiple logistic regression model predicting HiUse and using (among other things of your
+###choice) Median.home.value as a predictor to the training set. Compute the test error – i.e. the
+###fraction of the observations in the test set that are misclassified.
+
+
+Based on this model, with a threshold of 50%, there were 0 false negatives and 4 false positives.Overall it was correct $\frac{12 + 11}{27}$ =$.85$ of the time. 
+
+```{r logistic regression}
+model <- glm(hi_use~ customer_class +median_home_value + median_household_income + median_rent ,family=binomial(link='logit'),data=train)
+summary(model)
+
+
+
+```
+```{r test log model}
+
+library(caret)
+p <- predict(model, test, type = "response")
+print(summary(p))
+
+
+p_class <- ifelse(p > 0.5, "Predict 1", "Predict 0")
+print(table(p_class, test[["hi_use"]]))
+
+```
+
+###(c) Redo the split so that you have different observations in the training and test sets and produce
+###summary statistics of the variable HiUse in the new training and test sets. Fit the same multiple
+###logistic regression model in (b) to the new training set and compute the new test error.
+###Comment on your results with respect to the results from (a) and (b).
+
+```{r redo}
+set.seed(2)
+split = sample.split(atx$hi_use, SplitRatio = 0.80)
+train = subset(atx, split == TRUE)
+test = subset(atx, split == FALSE)
+print(summary(train$hi_use))
+print(summary(test$hi_use))
+
+model <- glm(hi_use~ customer_class +median_home_value + median_household_income + median_rent ,family=binomial(link='logit'),data=train)
+summary(model)
+
+p <- predict(model, test, type = "response")
+print(summary(p))
+
+
+p_class <- ifelse(p > 0.5, "Predict 1", "Predict 0")
+print(table(p_class, test[["hi_use"]]))
+```
+
+

@@ -110,6 +110,9 @@ ones? Does it look like residential irrigation has decreased over the past few y
 <br /><br />
 
 None of the postal codes were statistically significant, so I removed them.Year, multi-family, and residential were significant and had a positive impact on the probability of HiResIrr being above the mean. For every one unit increase in year is associated with an increase in the log-odds of being above the mean by  0.055649003832. When I converted month to a factor, only the hottest months of the year are significant in the positive direction. Irrigation_multifamily was significant in the negative direction.      
+
+
+
 ```{r log, warning=FALSE}
 library(caTools)
 logdf <- dfwide
@@ -159,6 +162,7 @@ The highest overall prediction rate was reached at k=5. The sensitivity is, or t
 ```{r KNN, message=FALSE, warning=FALSE}
 library(class)
 library(gmodels)
+library(caret)
 
 dfknn <- dfwide
 for (i in 1:length(dfknn$irrigation_residential)){
