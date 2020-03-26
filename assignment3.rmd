@@ -77,7 +77,7 @@ atx <- merge(water, houses, by="zip_code", all.x=TRUE)
 ```{r split}
 library(caTools)
 
-set.seed(5)
+set.seed(555)
 split = sample.split(atx$hi_use, SplitRatio = 0.80)
 train = subset(atx, split == TRUE)
 test = subset(atx, split == FALSE)
