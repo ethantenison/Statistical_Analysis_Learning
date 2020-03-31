@@ -267,8 +267,8 @@ recommendation for a the number of permits to issue.
 ```{r bootstrapping}
 alpha.fn=function(data,index){
         X=data$x1[index]
-        Y=data$y[index]
-        return((var(Y)-cov(X,Y))/(var(X)+var(Y)-2*cov(X,Y)))
+        =data$y[index]
+        
 }
 alpha.fn(df ,1:100)
 boot(data = df, statistic = alpha.fn, R = 1000)
