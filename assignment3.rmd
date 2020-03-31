@@ -11,37 +11,31 @@ In Question 2 on Assignment 2, we used the validation set approach to model asse
 ### (a) How many observations were in the sample? In the training set? In the test set? How many
  training sets were there? How many test sets? What are strengths and weaknesses of this
  approach?
- <br /><br />
 
-There were 4,422 observations in the dataset from assignment 2. There were 3316 obs in the training and 1106 in the test  with a 75% split. FOr the KNN classifier 3538 training 884 test, using a 80% 20% split. There was one set of each in both.  
+There were 4,422 observations in the dataset from assignment 2, and I used two test/training sets. There were 3316 obs in the training and 1106 in the test in the firest with a 75% split. FOr the KNN classifier 3538 and 884 using a 80% 20% split. 
 
 <br />
 
 The validation approach is simple and easy, but your estimates can have a lot of variation depending on what is inside your training/test set. 
 
-<br />Suppose we had used LOOCV instead of the validation set approach.
+###Suppose we had used LOOCV instead of the validation set approach.
 ###(b) How many observations would there have been in the training set? In the test set? How many
 training sets would there have been? How many test sets? What are strengths and weaknesses
 of this approach?
-<br /><br />
 
-With LOOCV there would be 4421 observations in training and 1 in test, but there would be 4422 train/test sets. The main advantage is that you will have less bias because n-1 observations are in your training set, but it is computational expensives. Therefore, it might take a long time to use if you have millions of observations.  
+With LOOCV there would be 4421 observations in training and 1 in test, but there would be 4422 train/test sets. The main advantage is that you will have less bias because n-1 observations are in your training set, but it is computational expensives. You wouldn't want to use this if you have millions of observations. 
 
-
-<br />
- Now suppose we had used k-fold cross-validation instead of the validation set approach.
+### Now suppose we had used k-fold cross-validation instead of the validation set approach.
 ### (c) How many observations would there have been in the training set? In the test set? How many
  training sets would there have been? How many test sets? What are strengths and weaknesses
  of this approach?
- <br /><br />
 
-There number of observations and sets depends on how many folds you select. 5 K-fold validation would split the data into 5 random sets of approximately the same size. The biggest appeal for kfold is its speed. It's less computationally intensive, but there is more bias. Increasing the number of folds reduces bias close to LOOCV. 
+It all depends on how many folds you select. 5 K-fold validation would split the data into 5 random sets of approximately the same size. The biggest appeal for kfold is its speed. It's less computationally intensive, but there is more bias. Increasing the number of folds reduces bias close to LOOCV. 
 
-<br />Now suppose we had used bootstrapping instead of the validation set approach.
+###Now suppose we had used bootstrapping instead of the validation set approach.
 ###(d) How many observations would there have been in the training set? In the test set? How many
 training sets would there have been? How many test sets? What are strengths and weaknesses
 of this approach?
-<br /><br />
 
 The number of observations is randomly assigned in the bootstrap method. The total number of bootstrap samples depends on how much variance is in your statistics. If there is high variance, you might want more samples than if the variance was low. 
 
@@ -89,9 +83,7 @@ split = sample.split(atx$hi_use, SplitRatio = 0.80)
 train = subset(atx, split == TRUE)
 test = subset(atx, split == FALSE)
 
-print("Train")
 print(summary(train$hi_use))
-print("Test")
 print(summary(test$hi_use))
 ```
 
@@ -99,7 +91,6 @@ print(summary(test$hi_use))
 ###(b) Fit a multiple logistic regression model predicting HiUse and using (among other things of your
 choice) Median.home.value as a predictor to the training set. Compute the test error – i.e. the
 fraction of the observations in the test set that are misclassified.
-<br /><br />
 
 
 Based on this model, with a threshold of 50%, there were 0 false negatives and 4 false positives.Overall it was correct $\frac{12 + 11}{27}$ =$.85$ of the time. 
@@ -111,7 +102,7 @@ summary(model)
 
 
 ```
-```{r test_log_model, message = FALSE, warning = FALSE}
+```{r test log model}
 
 library(caret)
 p <- predict(model, test, type = "response")
@@ -127,10 +118,7 @@ print(table(p_class, test[["hi_use"]]))
 summary statistics of the variable HiUse in the new training and test sets. Fit the same multiple
 logistic regression model in (b) to the new training set and compute the new test error.
 Comment on your results with respect to the results from (a) and (b).
-<br /><br />
 
-
-Based on this model, with a threshold of 50%, there were 4 false negatives and 4 false positives. Overall it was correct $\frac{12 + 6}{27}$ =$.67$ of the time. 
 ```{r redo}
 set.seed(2)
 split = sample.split(atx$hi_use, SplitRatio = 0.80)
@@ -154,95 +142,90 @@ print(table(p_class, test[["hi_use"]]))
 variable HiUse for each of the k training and validation sets separately. Fit the same multiple
 logistic regression model in (b) to each of the k training sets and compute the k new test errors.
 Comment on your results.
-<br /><br />
-
-Subracting the accuracy for each fold by one, the test errors are approximately: .18, .19, .11, .11, .15
 
 
 ```{r kfold}
 
 
 # Define training control
-set.seed(2) 
-train_control <- trainControl(method = "cv", number = 5, verboseIter = TRUE)
+set.seed(123) 
+train_control <- trainControl(method = "cv", number = 10)
 
 # train the model on training set
-model <- train(hi_use ~ customer_class + median_home_value + median_household_income + median_rent,
-               data = atx,
+model <- train(hi_use ~ customer_class +median_home_value + median_household_income + median_rent ,
+               data = train,
                trControl = train_control,
                method = "glm",
-               family=binomial()
-               )
+               family=binomial())
 
 # print cv scores
-print(model)
-print(model$resample)
-
+summary(model)
 
 ```
-
 
 # Q3: Bootstrapping in simulated data (30 points)
 
-In 1993, Barcelona began a long program to implement “Superblocks” aimed at reducing through traffic
-in urban areas with many pedestrians. Vox has interesting write up (https://www.vox.com/energy-andenvironment/2019/4/9/18300797/barcelona-spain-superblocks-urban-plan). Suppose you are employed by a hypothetical city that had implemented Superblocks along with a parking permit system for residentialtraffic. You notice two interesting things over the course of a year: 1) that vehicle-pedestrian accidents are surprisingly high when the number of permits issued are very low – perhaps so low that pedestrians forget that there are ever any cars at all, and 2) vehicle-pedestrian accidents are UN-surprisingly high when the number of permits issued are very high. This suggests a U-shaped relationship between vehicle-pedestrian accidents and the number of permits issued. 
+### In 1993, Barcelona began a long program to implement “Superblocks” aimed at reducing through traffic
+in urban areas with many pedestrians. Vox has interesting write up (https://www.vox.com/energy-andenvironment/2019/4/9/18300797/barcelona-spain-superblocks-urban-plan). Suppose you are employed by a
+hypothetical city that had implemented Superblocks along with a parking permit system for residential
+traffic. You notice two interesting things over the course of a year: 1) that vehicle-pedestrian accidents
+are surprisingly high when the number of permits issued are very low – perhaps so low that pedestrians
+forget that there are ever any cars at all, and 2) vehicle-pedestrian accidents are UN-surprisingly high
+when the number of permits issued are very high. This suggests a U-shaped relationship between
+vehicle-pedestrian accidents and the number of permits issued. 
 
 
-### (a) Generate 100 observations of the number of permits issued distributed N(mew =75, sigma =20). 
+<br />
+
+### (a) Generate 100 observations of the number of permits issued distributed N(mew =75, sigma =20).
 Generate an error term distributed N(mew =0, sigma =7). Generate a number of accidents from:
-Y = B0 + B1X1 + B2x1^2 + e where y is the number of accidents, B0 = 125, B1 = −3.8, X1 is the number of permits issued, B2= 0.035, and e is the error term. Plot the scatterplot. Plot the function in Equation 1 – but without the error term – over the scatterplot (hint: use stat_function() together with xlim() in ggplot). Estimate the number of permits issue that corresponds to the fewest number of accidents and draw a vertical line on the figure.
-<br /><br /> 
+y = b0 + b1x1+ b2x1^2 + e where y is the number of accidents, b0 = 125, b1 = −3.8, x1 is the number of permits issued,b2  = 0.035, and e is the error term. Plot the scatterplot. Plot the function in Equation 1 – but without the error term – over the scatterplot (hint: use stat_function() together with xlim() in ggplot). Estimate the number of permits issue that corresponds to the fewest number of accidents and draw a vertical line on the figure.
 
-The number of permits with the fewest number of accidents is approximately 54. 
-```{r simulated_data}
-library(ggplot2)
+        
+```{r boostrapping}
 set.seed(666)
-x1 <- rnorm(100, 75, 20)
+permits <- rnorm(100, 75, 20)
+error <- rnorm(100, 0, 7)
 
-e <- rnorm(100, 0, 7)
+y = 125 + -3.8*(permits) + 0.035*(permits)^2 
 
-y <- 125 + -3.8*x1 + 0.035*x1**2
+df <- data.frame(permits, error, y)
 
-df <- data.frame(x1,y)
+ggplot(data=df, aes(x=permits, y=y)) + 
+    geom_point(colour="red",size=1.5) + 
+     geom_vline(xintercept = 54.2857142857, linetype = "dashed")   
 
-ggplot(data = df, aes(x=x1, y=y)) + geom_point() + geom_vline(xintercept = 54.2857143, linetype = "dashed", color = "red") 
 
 ```
 
-### (b) Conduct a linear regression of the number of accidents on the number of permits and the
-squared number of permits and present and interpret the results. This is certainly an inference
-problem, but the coefficients b1 and b2 are not very interesting by themselves. What is more
-interesting is the vertical line at x= -b1/2b2 which identifies the minimum Y in terms of X.
-Calculate this value and interpret it.
+### (b) Conduct a linear regression of the number of accidents on the number of permits and the squared number of permits and present and interpret the results. This is certainly an inferenceproblem, but the coefficients b1 and b2 are not very interesting by themselves. What is more interesting is the vertical line at x= -b1/2b2which identifies the minimum Y in terms of X. Calculate this value and interpret it
 
 
-```{r sim_reg}
-library(boot)
 
-model <- lm(y ~ x1 + poly(x1,degree=2), data = df)
+```{r lm}
 
+model <- lm(y ~ permits + poly(permits,2) + error, data = df)
 summary(model)
 
 
 ```
 
 
-### (c) Linear regression gives us a standard error for the coefficients b1 and b2, but not for this
+### (c) Linear regression gives us a standard error for the coefficients b1 and b2 but not for this
 important and interesting value of x that minimizes the number of accidents. Use bootstrapping
 to estimate a standard error for this value. Interpret the results – make and explain a
 recommendation for a the number of permits to issue.
 
+
 ```{r bootstrapping}
+library(boot)
 
 alpha.fn=function(data,index){
         X=data$x1[index]
         Y=data$y[index]
         return((var(Y)-cov(X,Y))/(var(X)+var(Y)-2*cov(X,Y)))
 }
-
 alpha.fn(df ,1:100)
-
 boot(data = df, statistic = alpha.fn, R = 1000)
 
-```
-
+``` 
