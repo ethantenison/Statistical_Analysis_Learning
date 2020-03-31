@@ -9,33 +9,39 @@ output: word_document
 In Question 2 on Assignment 2, we used the validation set approach to model assessment and selection. 
 
 ### (a) How many observations were in the sample? In the training set? In the test set? How many
-### training sets were there? How many test sets? What are strengths and weaknesses of this
-### approach?
+ training sets were there? How many test sets? What are strengths and weaknesses of this
+ approach?
+ <br /><br />
 
-There were 4,422 observations in the dataset from assignment 2, and I used two test/training sets. There were 3316 obs in the training and 1106 in the test in the firest with a 75% split. FOr the KNN classifier 3538 and 884 using a 80% 20% split. 
+There were 4,422 observations in the dataset from assignment 2. There were 3316 obs in the training and 1106 in the test  with a 75% split. FOr the KNN classifier 3538 training 884 test, using a 80% 20% split. There was one set of each in both.  
 
 <br />
 
 The validation approach is simple and easy, but your estimates can have a lot of variation depending on what is inside your training/test set. 
 
-###Suppose we had used LOOCV instead of the validation set approach.
+<br />Suppose we had used LOOCV instead of the validation set approach.
 ###(b) How many observations would there have been in the training set? In the test set? How many
-###training sets would there have been? How many test sets? What are strengths and weaknesses
-###of this approach?
+training sets would there have been? How many test sets? What are strengths and weaknesses
+of this approach?
+<br /><br />
 
-With LOOCV there would be 4421 observations in training and 1 in test, but there would be 4422 train/test sets. The main advantage is that you will have less bias because n-1 observations are in your training set, but it is computational expensives. You wouldn't want to use this if you have millions of observations. 
+With LOOCV there would be 4421 observations in training and 1 in test, but there would be 4422 train/test sets. The main advantage is that you will have less bias because n-1 observations are in your training set, but it is computational expensives. Therefore, it might take a long time to use if you have millions of observations.  
 
-### Now suppose we had used k-fold cross-validation instead of the validation set approach.
+
+<br />
+ Now suppose we had used k-fold cross-validation instead of the validation set approach.
 ### (c) How many observations would there have been in the training set? In the test set? How many
-### training sets would there have been? How many test sets? What are strengths and weaknesses
-### of this approach?
+ training sets would there have been? How many test sets? What are strengths and weaknesses
+ of this approach?
+ <br /><br />
 
-It all depends on how many folds you select. 5 K-fold validation would split the data into 5 random sets of approximately the same size. The biggest appeal for kfold is its speed. It's less computationally intensive, but there is more bias. Increasing the number of folds reduces bias close to LOOCV. 
+There number of observations and sets depends on how many folds you select. 5 K-fold validation would split the data into 5 random sets of approximately the same size. The biggest appeal for kfold is its speed. It's less computationally intensive, but there is more bias. Increasing the number of folds reduces bias close to LOOCV. 
 
-###Now suppose we had used bootstrapping instead of the validation set approach.
+<br />Now suppose we had used bootstrapping instead of the validation set approach.
 ###(d) How many observations would there have been in the training set? In the test set? How many
-###training sets would there have been? How many test sets? What are strengths and weaknesses
-###of this approach?
+training sets would there have been? How many test sets? What are strengths and weaknesses
+of this approach?
+<br /><br />
 
 The number of observations is randomly assigned in the bootstrap method. The total number of bootstrap samples depends on how much variance is in your statistics. If there is high variance, you might want more samples than if the variance was low. 
 
@@ -66,13 +72,14 @@ water$zip_code <- water$postal_code
 
 houses <- read_csv("2014_Housing_Market_Analysis_Data_by_Zip_Code.csv")
 houses <- clean_names(houses)
-atx <- merge(water, houses, by="zip_code", all.x=TRUE)
+atx <- inner_join(water, houses, by="zip_code")
+atx$hi_use <- as.factor(atx$hi_use)
 
 ```
 
 
 ###(a) Split the data into a training set (80%) and a test set (20%). Produce summary statistics of the
-###variable HiUse for the training and test sets separately.
+variable HiUse for the training and test sets separately.
 
 ```{r split}
 library(caTools)
@@ -82,14 +89,17 @@ split = sample.split(atx$hi_use, SplitRatio = 0.80)
 train = subset(atx, split == TRUE)
 test = subset(atx, split == FALSE)
 
+print("Train")
 print(summary(train$hi_use))
+print("Test")
 print(summary(test$hi_use))
 ```
 
 
 ###(b) Fit a multiple logistic regression model predicting HiUse and using (among other things of your
-###choice) Median.home.value as a predictor to the training set. Compute the test error – i.e. the
-###fraction of the observations in the test set that are misclassified.
+choice) Median.home.value as a predictor to the training set. Compute the test error – i.e. the
+fraction of the observations in the test set that are misclassified.
+<br /><br />
 
 
 Based on this model, with a threshold of 50%, there were 0 false negatives and 4 false positives.Overall it was correct $\frac{12 + 11}{27}$ =$.85$ of the time. 
@@ -101,7 +111,7 @@ summary(model)
 
 
 ```
-```{r test log model}
+```{r test_log_model, message = FALSE, warning = FALSE}
 
 library(caret)
 p <- predict(model, test, type = "response")
@@ -114,10 +124,13 @@ print(table(p_class, test[["hi_use"]]))
 ```
 
 ###(c) Redo the split so that you have different observations in the training and test sets and produce
-###summary statistics of the variable HiUse in the new training and test sets. Fit the same multiple
-###logistic regression model in (b) to the new training set and compute the new test error.
-###Comment on your results with respect to the results from (a) and (b).
+summary statistics of the variable HiUse in the new training and test sets. Fit the same multiple
+logistic regression model in (b) to the new training set and compute the new test error.
+Comment on your results with respect to the results from (a) and (b).
+<br /><br />
 
+
+Based on this model, with a threshold of 50%, there were 4 false negatives and 4 false positives. Overall it was correct $\frac{12 + 6}{27}$ =$.67$ of the time. 
 ```{r redo}
 set.seed(2)
 split = sample.split(atx$hi_use, SplitRatio = 0.80)
@@ -137,4 +150,45 @@ p_class <- ifelse(p > 0.5, "Predict 1", "Predict 0")
 print(table(p_class, test[["hi_use"]]))
 ```
 
+###(d) Split the data into k folds for a value of k that you choose. Produce summary statistics of the
+variable HiUse for each of the k training and validation sets separately. Fit the same multiple
+logistic regression model in (b) to each of the k training sets and compute the k new test errors.
+Comment on your results.
 
+
+Subracting the accuracy for each fold by one, the test errors are approximately: .18, .19, .11, .11, .15
+
+<br /><br />
+```{r kfold}
+
+
+# Define training control
+set.seed(2) 
+train_control <- trainControl(method = "cv", number = 5, verboseIter = TRUE)
+
+# train the model on training set
+model <- train(hi_use ~ customer_class + median_home_value + median_household_income + median_rent,
+               data = atx,
+               trControl = train_control,
+               method = "glm",
+               family=binomial()
+               )
+
+# print cv scores
+print(model)
+print(model$resample)
+
+
+```
+
+
+# Q3: Bootstrapping in simulated data (30 points)
+
+In 1993, Barcelona began a long program to implement “Superblocks” aimed at reducing through traffic
+in urban areas with many pedestrians. Vox has interesting write up (https://www.vox.com/energy-andenvironment/2019/4/9/18300797/barcelona-spain-superblocks-urban-plan). Suppose you are employed by a hypothetical city that had implemented Superblocks along with a parking permit system for residential
+traffic. You notice two interesting things over the course of a year: 1) that vehicle-pedestrian accidents are surprisingly high when the number of permits issued are very low – perhaps so low that pedestrians forget that there are ever any cars at all, and 2) vehicle-pedestrian accidents are UN-surprisingly high when the number of permits issued are very high. This suggests a U-shaped relationship between vehicle-pedestrian accidents and the number of permits issued. 
+
+
+### (a) Generate 100 observations of the number of permits issued distributed N(mew =75, sigma =20). 
+Generate an error term distributed N(mew =0, sigma =7). Generate a number of accidents from:
+Y = B0 + B1X1 + B2x1^2 + e where y is the number of accidents, B0 = 125, B1 = −3.8, X1 is the number of permits issued, B2= 0.035, and eis the error term. Plot the scatterplot. Plot the function in Equation 1 – but without the error term – over the scatterplot (hint: use stat_function() together with xlim() in ggplot). Estimate the number of permits issue that corresponds to the fewest number of accidents and draw a vertical line on the figure.
