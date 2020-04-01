@@ -1,0 +1,65 @@
+---
+title: "Stepwise"
+author: "Vivek"
+date: "3/23/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Clear environment
+rm(list = ls())
+
+library(ISLR) #Has all the datasets used in the textbook
+hit <- Hitters #Save Hitters dataset 
+
+# Hitters is the MLB data from 1986, 1987 seasons - check details in help section ISLR>>Hitters
+# Refer to ISLR section 6.5
+
+sum(is.na(hit)) #Check for NAs
+hit <- na.omit(hit) #Remove rows with NAs to retain complete rows
+
+
+#install.packages("leaps") #subset selection functions are in leaps package
+library(leaps)
+
+# Subset selection can be used to select more important predictors
+# Three types - best subset selection, forward selection and backward selection
+
+# For the hitters dataset, predict salary based on player stats
+
+# Full model
+mod.full <- regsubsets(Salary ~ ., data = hit, nvmax = 19) #If you want smaller number of subsets, change nvmax
+# Note the Salary ~. notation - means include all other predictors in the dataframe
+mod.full.sum <- summary(mod.full)
+mod.full.sum
+mod.full.sum$rsq #notice that Rsqr always increases
+mod.full.sum$adjr2 #Adj Rsqr and bic first increases, but decreases as you add more and more predictors
+mod.full.sum$bic
+
+plot(mod.full, scale = "bic") # Top row suggests variables for best models ranked by bic, note the 6 suggested variables for the model with best bic
+which.min(mod.full.sum$bic) # Can also identify the model with minimum bic (or max adj Rsq or any other criteria) directly
+coef(mod.full, 6) #display the coefficient for these 6 variables
+
+
+# Forward stepsise selection
+mod.fwd <- regsubsets(Salary ~ ., data = hit, nvmax = 8, method = "forward") #Models with upto 8 predictors
+mod.fwd.sum <- summary(mod.fwd) 
+mod.fwd.sum #Notice which variables are selected in 1,2,3....19 variable models respectively and in what order
+
+# Backward stepwise selection
+mod.bck <- regsubsets(Salary ~ ., data = hit, nvmax = 8, method = "backward")#Models with upto 8 predictors
+mod.bck.sum <- summary(mod.bck) 
+mod.bck.sum #Notice which variables are selected in 19,18,17...1 variable models respectively and in what order
+
+plot(mod.fwd, scale = "bic") #Notice the variables identified in the best model
+plot(mod.bck, scale = "bic") #Notice the variables identified in the best model - are they the same as fwd selection?
+
+#would then run train and test to see which is best 
+
+
+```
+

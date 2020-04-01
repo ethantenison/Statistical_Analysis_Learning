@@ -1,0 +1,84 @@
+---
+title: "RidgeLasso"
+author: "Vivek"
+date: "3/23/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Clear environment
+rm(list = ls())
+
+library(ISLR) #Has all the datasets used in the textbook
+hit <- Hitters #Save Hitters dataset 
+
+# Hitters is the MLB data from 1986, 1987 seasons - check details in help section ISLR>>Hitters
+# Refer to ISLR section 6.6
+
+sum(is.na(hit)) #Check for NAs
+hit <- na.omit(hit) #Remove rows with NAs to retain complete rows
+
+#install.packages("glmnet")
+library(glmnet) #Ridge and Lasso regressions are in glmnet package
+
+# Ridge and Lasso regressions take need an outcome vector and matrix of predictors as input (only numerical values)
+x <- model.matrix(Salary ~., hit)[,-1] #model.matrix produces an intercept in the first column which we deselect using [,-1]
+# model.matrix also automatically creates dummy variables for categorical/factor type predictors
+y <- hit$Salary
+
+# Create training and test index
+set.seed (1)
+train <- sample(c(TRUE,FALSE), nrow(hit), rep=TRUE, prob = c(0.8,0.2))
+test <- (!train)
+```
+
+```{r}
+## Ridge regression ##
+
+mod.ridge <- glmnet(x[train,],y[train],alpha = 0) #for ridge regression use alpha = 0
+plot(mod.ridge, xvar = "lambda")
+
+cv.ridge <- cv.glmnet(x[train,], y[train], alpha = 0) #default number of folds is 10
+names(cv.ridge) # Note what variables are stored in the CV output
+plot(cv.ridge) # Plot MSE vs Lambda
+cv.ridge$lambda.1se # The lambda value at 1 standard error threshold is stored in the model output
+bestlam.ridge <- cv.ridge$lambda.1se
+
+pred.ridge <- predict(mod.ridge, newx = hit[test,], s = bestlam.ridge, type = "coefficients")[1:ncol(hit),] #predict using optimal lambda
+
+pred.ridge #display all coefficients - notice which ones are set to zero
+pred.ridge[pred.ridge != 0] #Show coefficients that are non-zero
+
+# Calculate test MSE
+mean((pred.ridge-y[test])^2)
+
+```
+
+
+```{r}
+## Lasso regression ##
+
+mod.lasso <- glmnet(x[train,], y[train], alpha = 1) #for lasso regression use alpha = 1
+plot(mod.lasso, xvar = "lambda")
+
+cv.lasso <- cv.glmnet(x[train,], y[train], alpha = 1) #default number of folds is 10
+plot(cv.lasso) # Plot MSE vs Lambda
+cv.lasso$lambda.min # The minimum lambda value for minimum MSE is stored in the model output
+bestlam <- cv.lasso$lambda.min
+
+pred.lasso <- predict(mod.lasso, newx = hit[test,], s = bestlam, type = "coefficients")[1:ncol(hit),] #predict using optimal lambda
+# Note - when running lasso/ridge models, by default all the inputs are standardized, so the coefficients will also be standardized.
+
+pred.lasso #display all coefficients - notice which ones are set to zero
+pred.lasso[pred.lasso != 0] #Show coefficients that are non-zero
+
+# Calculate test MSE
+mean((pred.lasso-y[test])^2)
+
+
+```
+
