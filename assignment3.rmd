@@ -260,7 +260,7 @@ library(boot)
 
 bs <- function(data, indices) {
   d <- data[indices,] # allows boot to select sample
-  fit <- lm(y ~ x + x2, data=d)
+  fit <- lm(y ~ x + x2, data=d, subset= indices)
   return(-coef(fit)["x"]/(2*coef(fit)["x2"]))
 }
 
