@@ -58,7 +58,7 @@ mod.bck.sum #Notice which variables are selected in 19,18,17...1 variable models
 plot(mod.fwd, scale = "bic") #Notice the variables identified in the best model
 plot(mod.bck, scale = "bic") #Notice the variables identified in the best model - are they the same as fwd selection?
 
-#would then run train and test to see which is best 
+#would then run train and test to see which is best tf
 
 
 ```
