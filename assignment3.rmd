@@ -1,27 +1,4 @@
-Skip to content
-Search or jump to…
 
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@ethantenison 
-Learn Git and GitHub without any code!
-Using the Hello World guide, you’ll start a branch, write comments, and open a pull request.
-
-
-ethantenison
-/
-Statistical_Analysis_Learning
-1
-00
- Code Issues 0 Pull requests 0 Actions Projects 0 Wiki Security Insights Settings
-Statistical_Analysis_Learning/assignment3.rmd
-@ethantenison ethantenison Added boostrap information.
-50cb307 18 hours ago
-248 lines (169 sloc)  9.83 KB
-  
 ---
 title: "Assignment 3"
 author: "Ethan Tenison"
@@ -32,7 +9,7 @@ output: word_document
 # Q1: Samples and Resampling (40 points)
 In Question 2 on Assignment 2, we used the validation set approach to model assessment and selection. 
 
-### (a) How many observations were in the sample? In the training set? In the test set? How many
+## (a) How many observations were in the sample? In the training set? In the test set? How many
  training sets were there? How many test sets? What are strengths and weaknesses of this
  approach?
  <br /><br />
@@ -43,8 +20,10 @@ There were 4,422 observations in the dataset from assignment 2. There were 3316 
 
 The validation approach is simple and easy, but your estimates can have a lot of variation depending on what is inside your training/test set. 
 
-<br />Suppose we had used LOOCV instead of the validation set approach.
-###(b) How many observations would there have been in the training set? In the test set? How many
+<br />
+
+
+### (b) How many observations would there have been in the training set for LOOCV? In the test set? How many
 training sets would there have been? How many test sets? What are strengths and weaknesses
 of this approach?
 <br /><br />
@@ -52,22 +31,21 @@ of this approach?
 With LOOCV there would be 4421 observations in training and 1 in test, but there would be 4422 train/test sets. The main advantage is that you will have less bias because n-1 observations are in your training set, but it is computational expensives. Therefore, it might take a long time to use if you have millions of observations.  
 
 
-<br />
- Now suppose we had used k-fold cross-validation instead of the validation set approach.
-### (c) How many observations would there have been in the training set? In the test set? How many
- training sets would there have been? How many test sets? What are strengths and weaknesses
- of this approach?
+
+### (c) How many observations would there have been in the training set using kfold CV? In the test set? How
+training sets would there have been? How many test sets? What are strengths and weaknesses
+of this approach?
  <br /><br />
 
-There number of observations and sets depends on how many folds you select. 5 K-fold validation would split the data into 5 random sets of approximately the same size. The biggest appeal for kfold is its speed. It's less computationally intensive, but there is more bias. Increasing the number of folds reduces bias close to LOOCV. 
+There number of observations and sets depends on how many folds you select. 5 K-fold validation would split the data into 5 random sets of approximately 884 or 885. Each set would get a chance to act as the training set, and all the other sets are added together to function as the test set. The biggest appeal for kfold is its speed. It's less computationally intensive, but there is more bias. Increasing the number of folds reduces bias close to LOOCV. 
 
-<br />Now suppose we had used bootstrapping instead of the validation set approach.
-###(d) How many observations would there have been in the training set? In the test set? How many
-training sets would there have been? How many test sets? What are strengths and weaknesses
+
+### (d) How many observations would there have been in the training set using bootstrapping? In the test set?
+How many training sets would there have been? How many test sets? What are strengths and weaknesses
 of this approach?
 <br /><br />
 
-The number of observations is randomly assigned in the bootstrap method. The total number of bootstrap samples depends on how much variance is in your statistics. If there is high variance, you might want more samples than if the variance was low. 
+The bootstrap method does not separate the data into test and train. Random samples are taken from the original sample k number of times. The total number of bootstrap samples you want depends on how much variance is in your statistics. If there is high variance, you might want more samples than if the variance was low. 
 
 <br /><br />
 
@@ -99,7 +77,7 @@ atx$hi_use <- as.factor(atx$hi_use)
 ```
 
 
-###(a) Split the data into a training set (80%) and a test set (20%). Produce summary statistics of the
+### (a) Split the data into a training set (80%) and a test set (20%). Produce summary statistics of the
 variable HiUse for the training and test sets separately.
 
 ```{r split}
@@ -115,7 +93,7 @@ print(summary(test$hi_use))
 ```
 
 
-###(b) Fit a multiple logistic regression model predicting HiUse and using (among other things of your
+### (b) Fit a multiple logistic regression model predicting HiUse and using (among other things of your
 choice) Median.home.value as a predictor to the training set. Compute the test error – i.e. the
 fraction of the observations in the test set that are misclassified.
 <br /><br />
@@ -135,7 +113,7 @@ p_class <- ifelse(p > 0.5, "Predict 1", "Predict 0")
 print(table(p_class, test[["hi_use"]]))
 ```
 
-###(c) Redo the split so that you have different observations in the training and test sets and produce
+### (c) Redo the split so that you have different observations in the training and test sets and produce
 summary statistics of the variable HiUse in the new training and test sets. Fit the same multiple
 logistic regression model in (b) to the new training set and compute the new test error.
 Comment on your results with respect to the results from (a) and (b).
@@ -158,7 +136,7 @@ p_class <- ifelse(p > 0.5, "Predict 1", "Predict 0")
 print(table(p_class, test[["hi_use"]]))
 ```
 
-###(d) Split the data into k folds for a value of k that you choose. Produce summary statistics of the
+### (d) Split the data into k folds for a value of k that you choose. Produce summary statistics of the
 variable HiUse for each of the k training and validation sets separately. Fit the same multiple
 logistic regression model in (b) to each of the k training sets and compute the k new test errors.
 Comment on your results.
@@ -238,11 +216,12 @@ The number of permits with the fewest number of accidents is approximately 54.
 ```{r simulated_data}
 library(ggplot2)
 set.seed(666)
-x1 <- rnorm(100, 75, 20)
+x <- rnorm(100, 75, 20)
+x2 <- x*x
 e <- rnorm(100, 0, 7)
-y <- 125 + -3.8*x1 + 0.035*x1**2
-df <- data.frame(x1,y)
-ggplot(data = df, aes(x=x1, y=y)) + geom_point() + geom_vline(xintercept = 54.2857143, linetype = "dashed", color = "red") 
+y <- 125 + -3.8*x + 0.035*x**2
+df <- data.frame(y, x, x2)
+ggplot(data = df, aes(x=x, y=y)) + geom_point() + geom_vline(xintercept = 54.2857143, linetype = "dashed", color = "red") 
 ```
 
 ### (b) Conduct a linear regression of the number of accidents on the number of permits and the
@@ -250,12 +229,19 @@ squared number of permits and present and interpret the results. This is certain
 problem, but the coefficients b1 and b2 are not very interesting by themselves. What is more
 interesting is the vertical line at x= -b1/2b2 which identifies the minimum Y in terms of X.
 Calculate this value and interpret it.
+<br /><br /> 
 
+124.99999999999995736744 -3.79999999999999760192(54.2857143) + 0.03500000000000001721(54.2857143)^2 = 21.8571428571
 
+<br /> *21.8571428571* is the number of accidents we would expect to see with approx 54 permits issued. 
 ```{r sim_reg}
 library(boot)
-model <- lm(y ~ x1 + poly(x1,degree=2), data = df)
+model <- lm(y ~ x + x2, data = df)
 summary(model)
+
+
+
+
 ```
 
 
@@ -264,25 +250,24 @@ important and interesting value of x that minimizes the number of accidents. Use
 to estimate a standard error for this value. Interpret the results – make and explain a
 recommendation for a the number of permits to issue.
 
-```{r bootstrapping}
-alpha.fn=function(data,index){
-        X=data$x1[index]
-        =data$y[index]
-        
+<br /><br />
+
+The standard error and bias is extremely lower. Therefore, we can be confident that 54or 55 permits would result in the lowest number of accidents. 
+
+```{r bootstrap, message= FALSE}
+
+library(boot)
+
+bs <- function(data, indices) {
+  d <- data[indices,] # allows boot to select sample
+  fit <- lm(y ~ x + x2, data=d)
+  return(-coef(fit)["x"]/(2*coef(fit)["x2"]))
 }
-alpha.fn(df ,1:100)
-boot(data = df, statistic = alpha.fn, R = 1000)
+
+results <- boot(data=df, statistic=bs,
+   R=1000)
+
+results 
+
 ```
 
-© 2020 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Help
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
