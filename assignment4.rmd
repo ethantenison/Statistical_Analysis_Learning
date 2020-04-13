@@ -36,4 +36,17 @@ comparison metrics.
 <br />
 
 There are essentially two methods for comparing models, make adjustments to the training error to account for overfitting, and directly estimating test error through cross-validation. 
-Since R^2 and MSE increase and decrease monotonically as predictors are added, metrics such as Cp, AIC, BIC, and adjusted R^2 are used. Each of them has a penalty term which increases as does the number of predictors.   
+Since R^2 and MSE increase and decrease monotonically as predictors are added, metrics such as Cp, AIC, BIC, and adjusted R^2 are used. Each of them has a penalty term which increases as does the number of predictors.
+<br />
+
+**C~p~** = \frac{1}{n}(RSS - 2d$\hat\sigma^2$), where d is the number of predictors, and $\hat\sigma^2$ is an estimate of the error associated with each response measurement. THis is done to adjust for the decline in RSS that occurs when more predictors are added. 
+
+<br />
+**AIC** = \frac{1}{n$\hat\sigma^2$}(RSS - 2d$\hat\sigma^2$), which uses maximum likelihood and is proportional to  *C~p~*
+
+<br />
+**BIC** = \frac{1}{n$\hat\sigma^2$}(RSS - log(n)d$\hat\sigma^2$), which uses a log instead of 2d, resulting in a larger penality for a high number of predictors. 
+
+
+<br />
+**Adjusted $R^2$ ** = \frac{\frac{RSS}{n-d-1}}{\frac{TSS}{n-1}}, the result being that adding predictors that are just noise will only slightly decrease the RSS. 
