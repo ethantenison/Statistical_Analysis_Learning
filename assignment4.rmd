@@ -115,7 +115,7 @@ FWDfit.p<-ols_step_forward_p(model,penter=.0002)
 
 #This gives you the short summary of the models at each step
 print("Forward")
-print(FWDfit.p)
+FWDfit.p
 
 
 
@@ -124,11 +124,11 @@ print(FWDfit.p)
 ```{r backward}
 
 
-BWDfit.p<-ols_step_backward_p(model)
+BWDfit.p <-ols_step_backward_p(model, prem = .000001)
 
 #This gives you the short summary of the models at each step
 print("Backward")
-print(BWDfit.p)
+BWDfit.p
 
 
 
@@ -138,9 +138,62 @@ print(BWDfit.p)
 
 
 (b) Fit a Lasso model to the data. Use cross-validation to select a value of ${\lambda}$ using the one-standarderror rule and plot the relationship between error and ${\lambda}$ What is the test error?
+<br />
+
+Best ${\lambda}$ = 0.01142745
+Test MSE = 14.92172
+
+
+```{r lasso_cross}
+library(glmnet)
+library(plotmo)
+
+data_noID_noMC <- na.omit(data_noID_noMC)
+
+grid <- 10^seq(10,-2,length=1000) #these functions automatically plot lambda, so we are going to force it to plot over a range of lambda from 10^10 to 10^-2
+
+x <- model.matrix(Mail_Return_Rate_CEN_2010~.,data_noID_noMC)
+y <-data_noID_noMC$Mail_Return_Rate_CEN_2010
+train <- sample(1:nrow(x), nrow(x)*.80)
+test <- (-train)
+y.test <- y[test]
+
+# Checks
+dim (x[train,])
+length(y[train])
+length(y.test)
+
+lasso.mod <-glmnet(x[train,], y[train],alpha=1,lambda = grid)
+# glmnet() function standardizes the variables by default so that they are on the same scale.
+# If alpha=0 then a ridge regression model is fit, and if alpha=1 then a lasso model is fit.
+
+dim(coef(lasso.mod ))
+summary(lasso.mod)
+
+# par(mfrow=c(1,2))
+# plot_glmnet(lasso.mod, xvar = "lambda", label = 5)
+# 
+# plot_glmnet(lasso.mod, xvar="dev",label=5)
+
+set.seed(1)
+#how to choose best lambda
+set.seed(1)
+cv.out=cv.glmnet(x[train,],y[train],alpha=1)
+plot(cv.out, label=TRUE)
+coef(cv.out)
+
+bestlam=cv.out$lambda.min
+bestlam
+
+#test MSE associated with this value of ??
+lasso.pred=predict(lasso.mod,s=bestlam,newx=x[test,])
+mse= mean((lasso.pred-y.test)^2)
+```
 
 (c) Examine the coefficients at the one-standard-error value of ${\lambda}$and comment on your findings.
 What are some important determinants of low census mail return rates?
+
+
 
 
 (d) Based on your findings in (a-c), what can you say about where to direct resources to help
