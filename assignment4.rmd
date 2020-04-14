@@ -50,3 +50,98 @@ Since R^2 and MSE increase and decrease monotonically as predictors are added, m
 
 <br />
 **Adjusted $R^2$ ** = \frac{\frac{RSS}{n-d-1}}{\frac{TSS}{n-1}}, the result being that adding predictors that are just noise will only slightly decrease the RSS. 
+
+
+# Q2: Model Selection in data (40 points)
+
+```{r clean, cache=TRUE}
+library(readr)
+library(dplyr)
+library(caTools)
+
+
+set.seed(27)
+data <- read_csv("pdb2016bgv8_us_clean (1).csv")
+
+
+data <- filter(data, data$State_name == "Texas" & data$County_name == "Travis County") 
+drop_columns <- c("TEA_Update_Leave_CEN_2010", "BILQ_Mailout_count_CEN_2010", "BILQ_Frms_CEN_2010",
+"pct_TEA_Update_Leave_CEN_2010", "pct_BILQ_Mailout_count_CEN_2010", "Low_Response_Score",
+"Census_Mail_Returns_CEN_2010")
+data <- data[ , !(names(data) %in% drop_columns)]
+data_noID <- data[9:ncol(data)]
+drop_LD_columns <- c("AIAN_LAND", "Tot_Population_CEN_2010", "Females_CEN_2010", "Females_ACS_10_14",
+"Pop_65plus_CEN_2010", "Pop_65plus_ACS_10_14", "Non_Inst_GQ_CEN_2010", "Pop_5yrs_Over_ACS_10_14",
+"Pop_25yrs_Over_ACS_10_14", "ENG_VW_ACS_10_14", "NonFamily_HHD_CEN_2010", "NonFamily_HHD_ACS_10_14",
+"Tot_Prns_in_HHD_CEN_2010", "Tot_Occp_Units_CEN_2010", "Tot_Occp_Units_ACS_10_14", "Tot_Vacant_Units_CEN_2010",
+"Tot_Vacant_Units_ACS_10_14", "Owner_Occp_HU_CEN_2010", "Owner_Occp_HU_ACS_10_14",
+"Valid_Mailback_Count_CEN_2010", "pct_Females_CEN_2010", "pct_Pop_5yrs_Over_ACS_10_14",
+"pct_Not_MrdCple_HHD_CEN_2010", "pct_Vacant_Units_ACS_10_14", "pct_Owner_Occp_HU_CEN_2010",
+"pct_TEA_MailOutMailBack_CEN_2010", "pct_Deletes_CEN_2010")
+data_noID_noMC <- data_noID [ , !(names(data_noID) %in% drop_LD_columns)]
+data_noID_noMC <- data_noID_noMC [, -grep("pct_", colnames(data_noID_noMC))]
+
+split = sample.split(data_noID_noMC$Mail_Return_Rate_CEN_2010, SplitRatio = 0.80)
+train = subset(data_noID_noMC, split == TRUE)
+test = subset(data_noID_noMC, split == FALSE)
+
+```
+
+### (a) Use both forward and backward stepwise selection to find the best models containing 10 or
+fewer predictors. List the predictors in the order in which they enter the model for both
+methods. 
+
+```{r forward_backward}
+library(caret)
+library(leaps)
+library(MASS)
+
+
+# Fit the full model 
+#full.model <- lm(Mail_Return_Rate_CEN_2010 ~., data = train)
+# Stepwise regression model
+#step.model <- stepAIC(full.model, direction = "forward", steps = 10, 
+#                      trace = FALSE)
+#summary(step.model)
+
+#models <- regsubsets(Mail_Return_Rate_CEN_2010~., data = train, nvmax = 10, method = "forward")
+#summary(models)
+
+library(olsrr)
+
+model<-lm(Mail_Return_Rate_CEN_2010~., data = train)
+
+FWDfit.p<-ols_step_forward_p(model,penter=.0002)
+
+#This gives you the short summary of the models at each step
+print("Forward")
+print(FWDfit.p)
+
+
+
+```
+
+```{r backward}
+
+
+BWDfit.p<-ols_step_backward_p(model)
+
+#This gives you the short summary of the models at each step
+print("Backward")
+print(BWDfit.p)
+
+
+
+
+
+```
+
+
+(b) Fit a Lasso model to the data. Use cross-validation to select a value of ${\lambda}$ using the one-standarderror rule and plot the relationship between error and ${\lambda}$ What is the test error?
+
+(c) Examine the coefficients at the one-standard-error value of ${\lambda}$and comment on your findings.
+What are some important determinants of low census mail return rates?
+
+
+(d) Based on your findings in (a-c), what can you say about where to direct resources to help
+complete the 2020 Census? Who needs to know this information?
