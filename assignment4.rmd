@@ -175,9 +175,9 @@ summary(lasso.mod)
 # 
 # plot_glmnet(lasso.mod, xvar="dev",label=5)
 
-set.seed(1)
+
 #how to choose best lambda
-set.seed(1)
+set.seed(27)
 cv.out=cv.glmnet(x[train,],y[train],alpha=1)
 plot(cv.out, label=TRUE)
 coef(cv.out)
@@ -193,7 +193,23 @@ mse= mean((lasso.pred-y.test)^2)
 (c) Examine the coefficients at the one-standard-error value of ${\lambda}$and comment on your findings.
 What are some important determinants of low census mail return rates?
 
+```{r coefficients}
+library(caret)
 
+out=glmnet(x,y,alpha=1,lambda=grid)
+lasso.coef=predict(out,type="coefficients",s=bestlam)[1:161,]
+
+lasso.coef_no0 = data.frame(as.list(lasso.coef[lasso.coef!=0]))
+
+library(tidyr)
+
+data_long <- gather(lasso.coef_no0, coefficient, value, "X.Intercept.":"avg_Agg_House_Value_ACSMOE_10_14", factor_key=TRUE)
+data_long <- mutate(data_long, absolute_value = abs(value))
+
+head(data_long[order(data_long$absolute_value), ])
+
+
+```
 
 
 (d) Based on your findings in (a-c), what can you say about where to direct resources to help
