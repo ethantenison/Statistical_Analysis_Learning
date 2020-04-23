@@ -21,22 +21,25 @@ return rates in 2010 could help with planning for 2020.
 
 
 ### (a) Describe how you might use forward vs. backward stepwise selection to find the best model of
-low return rates. Explain the advantages and disadvantages of one approach over the other.
-Explain how these approaches compare to best subset selection.
+###low return rates. Explain the advantages and disadvantages of one approach over the other.
+##Explain how these approaches compare to best subset selection.
+<br />
 <br />
 
 
 
-Using forward and backward stepwise selection will help us decide which features are most important in our model, especially when n < p. Both are computationally superior to best subset selection, where 2^p models are created. While FSS is computationally superior, there is still a chance that the selected model  will be the best. FSS adds predictors one at a time, and each successive step might not include the same vital predictors as the previous one. BSS does not have this problem because all predictors are added into the model first, and then substracted. The downside of BSS is that n must be greater than p. 
+Using forward and backward stepwise selection will help us decide which features are most important in our model, especially when n < p. Both are computationally superior to best subset selection, where 2^p models are created. While FSS is computationally superior, there is still a chance that the selected model will not be the best one. Some casual predictors with low p-values at the beginning of the selection process might not be included . BSS does not have this problem because all predictors are added into the model first, and then substracted. The downside of BSS is that n must be greater than p. 
 
 
 ### (b) How would you use model-level comparison metrics to determine when one model is better
-than another? Explain how a “penalty” works and how they manifest differently in different
-comparison metrics.
+### than another? Explain how a “penalty” works and how they manifest differently in different
+### comparison metrics.
+<br />
 <br />
 
 There are essentially two methods for comparing models, make adjustments to the training error to account for overfitting, and directly estimating test error through cross-validation. 
-Since R^2 and MSE increase and decrease monotonically as predictors are added, metrics such as Cp, AIC, BIC, and adjusted R^2 are used. Each of them has a penalty term which increases as does the number of predictors.
+
+Since R^2 and MSE increase and decrease monotonically as predictors are added, metrics such as Cp, AIC, BIC, and adjusted R^2 are used. Each of them has a penalty term which increases with the number of predictors.
 <br />
 
 **C~p~** = \frac{1}{n}(RSS - 2d$\hat\sigma^2$), where d is the number of predictors, and $\hat\sigma^2$ is an estimate of the error associated with each response measurement. THis is done to adjust for the decline in RSS that occurs when more predictors are added. 
@@ -54,7 +57,7 @@ Since R^2 and MSE increase and decrease monotonically as predictors are added, m
 
 # Q2: Model Selection in data (40 points)
 
-```{r clean, cache=TRUE}
+```{r clean, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 library(readr)
 library(dplyr)
 library(caTools)
@@ -88,8 +91,8 @@ test = subset(data_noID_noMC, split == FALSE)
 ```
 
 ### (a) Use both forward and backward stepwise selection to find the best models containing 10 or
-fewer predictors. List the predictors in the order in which they enter the model for both
-methods. 
+### fewer predictors. List the predictors in the order in which they enter the model for both
+### methods. 
 
 ```{r forward_backward}
 library(caret)
@@ -128,19 +131,17 @@ BWDfit.p <-ols_step_backward_p(model, prem = .000001)
 
 #This gives you the short summary of the models at each step
 print("Backward")
-BWDfit.p
-
-
-
-
+print(BWDfit.p)
+print(BWDfit.p$model$coefficients)
 
 ```
 
 
-(b) Fit a Lasso model to the data. Use cross-validation to select a value of ${\lambda}$ using the one-standarderror rule and plot the relationship between error and ${\lambda}$ What is the test error?
+### (b) Fit a Lasso model to the data. Use cross-validation to select a value of ${\lambda}$ using the one-standarderror rule and plot the relationship between error and ${\lambda}$ What is the test error?
 <br />
 
-Best ${\lambda}$ = 0.01142745
+Best ${\lambda}$ = 0.01142745 
+<br />
 Test MSE = 14.92172
 
 
@@ -190,8 +191,11 @@ lasso.pred=predict(lasso.mod,s=bestlam,newx=x[test,])
 mse= mean((lasso.pred-y.test)^2)
 ```
 
-(c) Examine the coefficients at the one-standard-error value of ${\lambda}$and comment on your findings.
-What are some important determinants of low census mail return rates?
+### (c) Examine the coefficients at the one-standard-error value of ${\lambda}$and comment on your findings.
+### What are some important determinants of low census mail return rates?
+
+<br />
+Based on the top 5 predictors, Home value and Median household income are some of the largest determinants of low census mail return rates. 
 
 ```{r coefficients}
 library(caret)
@@ -212,5 +216,191 @@ head(data_long[order(data_long$absolute_value), ])
 ```
 
 
-(d) Based on your findings in (a-c), what can you say about where to direct resources to help
-complete the 2020 Census? Who needs to know this information?
+### (d) Based on your findings in (a-c), what can you say about where to direct resources to help
+### complete the 2020 Census? Who needs to know this information?
+ 
+ <br/>
+ 
+I think it's safe to say that low income neighborhoods are going to need more help completing the census. The Census Bureau needs to know this along with any organization assisting gain responses. 
+ 
+ 
+# Q3: High dimensional simulated data (50 points)
+Surveys often ask multiple questions intended to triangulate on a single concept; when this happens the
+groups of questions have positive correlations between them. The following function will generate a
+simulated data set with a response variable simY for n observations as a function of g groups of
+questions, and p_g responses per group. Variables labeled like g1q3 indicate the third question in group
+1. There will also be vector of the “true” betas used to generate simY from a linear combination of each
+group’s questions (in this case just a sum). 
+
+
+```{r simulated_function}
+library(MASS)
+data_gen <- function (n, g, p_g) {
+simX <<- data.frame(ID=seq(1:n))
+sum_g <- data.frame(ID=seq(1:n))
+sapply(seq(1:g), function (i) {
+temp_p <- qr.Q(qr(matrix(rnorm(p_g^2), p_g)))
+Sigma_g <- abs(crossprod(temp_p, temp_p*(p_g:1)))
+simX_tmp <- as.data.frame(mvrnorm(n=n, mu=runif(p_g, min = 0, max = 10), Sigma=Sigma_g))
+colnames(simX_tmp) <- paste0("g", i, "q", seq(1:p_g))
+simX <<- cbind(simX, simX_tmp)
+sum_g <<- cbind(sum_g, rowSums(simX_tmp))
+})
+colnames(sum_g) <- c("ID",seq(1:g))
+betas <<- rnorm(g+1, 0, 1)*10
+error <<- rnorm(n, 0, 5)
+simY <<- rowSums(t(t(sum_g[2:ncol(sum_g)]) * betas[2:length(betas)])) + betas[1] + error
+simData <<- cbind(simX, simY)
+}
+
+
+```
+
+
+
+### (a) Generate 1000 observations with 3 groups of 3 questions each – we will call this the n1000-g3-
+### q3-simData. Examine the correlation or covariance matrices; comment on the correlation or
+### covariance within groups of questions vs. between groups of questions (hint: compare g1q1 to
+### al the g1 questions vs. g1q1 and all the g2 or g3 questions).
+
+<br/>
+
+It appears that simy is negatively correlated with group questions 1 & 3, and has a slight positive correlation with group of questions 2. Questions within groups have a slight positive correlation. 
+
+```{r}
+
+set.seed(1000)
+simdata <- data_gen(n=1000, g=3, p_g = 3)
+
+res <- cor(simdata)
+
+library(corrplot)
+corrplot::corrplot(res, type = "upper", order = "hclust", 
+         tl.col = "black")
+
+```
+
+
+
+### (b) Use PCR to analyze the n1000-g3-q3-simData. Split the data into 80% training and 20% test.
+### How many components account for at least 50% of the total variation in X? How many account
+### for at least 80% of the total variation in simY? Plot the cross-validation error as the number of
+### components increase, choose a number of components to include and explain your choice.
+### What is the test error? 
+
+<br/>
+
+The first three components account for atleast 50% of total variation in simY while 7 account for at least 80%. I chose 9 components to test because it explains the most variation, and the test error is 32.70264
+
+```{r PCR}
+
+ 
+require(pls)
+library(caTools)
+set.seed (27)
+
+split = sample.split(simdata$simY, SplitRatio = 0.80)
+train = subset(simdata, split == TRUE)
+test = subset(simdata, split == FALSE)
+ 
+pcr_model <- pls::pcr(simY~., data = train, scale = TRUE, validation = "CV")
+
+summary(pcr_model)
+
+# Plot the cross validation MSE
+validationplot(pcr_model, val.type="MSEP")
+
+#test error 
+y_test <- test[, 11]
+pcr_pred <- predict(pcr_model, test, ncomp = 9)
+mean((pcr_pred - y_test)^2)
+
+```
+
+
+
+### (c) Use PLS to analyze the n1000-g3-q3-simData. How many components account for at least 50%
+### of the total variation in X? How many account for at least 80% of the total variation in simY? Plot
+### the cross-validation error as the number of components increase, choose a number of
+### components to include and explain your choice. What is the test error?
+
+<br/>
+
+Four components account for atleast 50% and seven account for atleast 80%. I chose 4 components to test because there is not much change after that, and the test error was 25.87317. 
+
+
+```{r pls}
+
+set.seed (27)
+
+pls_model <- pls::plsr(simY~., data = train, scale = TRUE, validation = "CV")
+
+summary(pls_model)
+
+# Plot the cross validation MSE
+validationplot(pls_model, val.type="MSEP")
+
+#test error 
+y_test <- test[, 11]
+pcr_pred <- predict(pls_model, test, ncomp = 4)
+mean((pcr_pred - y_test)^2)
+
+
+```
+
+### (d) Comment on the balance between predictive accuracy and interpretability in PCR and PLS. 
+
+
+Although PCR and PLS are similar, PLS performs better, and has higher accuracy, because it summarizes the predictors that are also associated with the outcome variable. These methods are difficult to interpret because the variables are transformed in orthogonal space and there is no feature selection, such as in Ridge and Lasso regression. 
+
+
+### e) Generate new data with 100 observations and 8 groups of 12 questions each. Use least squares
+### to model simY on all the predictors. Comment on the overall fit of the model, and whether or
+### not you think the model is useful. Finally, generate new data with 100 observations and 12
+### groups of 12 questions each. Use least squares to model simY on all the predictors and comment
+### on this process with respect to PCR and PLS. 
+
+
+<br/>
+
+The test error is huge! And it increases when more groups are included. It is somewhat interpretable though because it gives you pvalues for individual
+
+
+
+```{r lm812}
+
+set.seed (27)
+simdata_812 <- data_gen(n=100, g=8, p_g = 12)
+split = sample.split(simdata_812$simY, SplitRatio = 0.80)
+train = subset(simdata, split == TRUE)
+test = subset(simdata, split == FALSE)
+
+model812<-lm(simY~., data = train)
+
+summary(model812)
+
+#test error 
+lm812_pred <- predict(model812, test)
+mean((lm812_pred - y_test)^2)
+
+
+```
+
+
+```{r lm1212}
+set.seed (27)
+simdata_1212 <- data_gen(n=100, g=12, p_g = 12)
+split = sample.split(simdata_1212$simY, SplitRatio = 0.80)
+train = subset(simdata, split == TRUE)
+test = subset(simdata, split == FALSE)
+
+model1212<-lm(simY~., data = train)
+
+summary(model1212)
+
+
+#test error 
+lm1212_pred <- predict(model1212, test)
+mean((lm1212_pred - y_test)^2)
+
+```
