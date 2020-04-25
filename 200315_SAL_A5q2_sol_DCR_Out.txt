@@ -18,11 +18,146 @@
     test train
   0 2716  6347
   1  689  1529
-Error in isOpen(file, "w") : invalid connection
-Error in isOpen(file, "w") : invalid connection
-In addition: Warning message:
-In if (file == "") file <- stdout() else if (is.character(file)) { :
-  the condition has length > 1 and only the first element will be used
-Error in isOpen(file, "w") : invalid connection
-Error in e1[[j]] : subscript out of bounds
- chr [1:10813] "train" "train" "train" "test" "train" "test" "test" "train" ...
+[1] "EnergyAudit_clean densities calculated for a 100 square grid"
+[1] "EnergyAudit_clean densities standardized over 100 square grid"
+
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ ., data = train, mindev = 0.001, 
+    minsize = 5)
+Variables actually used in tree construction:
+ [1] "needs_duct_fixed"                    "attic_r_value"                       "duct_system_1_r_value"              
+ [4] "attic_sqft"                          "year_built"                          "system_1_sqft_ton"                  
+ [7] "system_1_age_years"                  "tcad_or_wcad_property_id_s"          "lat"                                
+[10] "window_screen_area_recommended_sqft" "long"                                "recommended_additional_r_value"     
+[13] "x1"                                 
+Number of terminal nodes:  34 
+Residual mean deviance:  40.99 = 307900 / 7510 
+Distribution of residuals:
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+-24.50000  -4.62700  -0.30110  -0.00219   3.69900  65.61000 
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ ., data = train, mindev = 0.001, 
+    minsize = 10)
+Variables actually used in tree construction:
+ [1] "needs_duct_fixed"                    "attic_r_value"                       "duct_system_1_r_value"              
+ [4] "attic_sqft"                          "year_built"                          "system_1_sqft_ton"                  
+ [7] "system_1_age_years"                  "bedrooms"                            "lat"                                
+[10] "conditioned_sqft"                    "long"                                "window_screen_area_recommended_sqft"
+[13] "recommended_additional_r_value"      "tcad_or_wcad_property_id_s"          "x1"                                 
+Number of terminal nodes:  29 
+Residual mean deviance:  43.15 = 324300 / 7515 
+Distribution of residuals:
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+-38.33000  -4.63000  -0.30110  -0.00121   3.69900  65.53000 
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ ., data = train, mindev = 0.001, 
+    minsize = 100)
+Variables actually used in tree construction:
+[1] "needs_duct_fixed"                    "attic_r_value"                       "duct_system_1_r_value"              
+[4] "attic_sqft"                          "year_built"                          "system_1_sqft_ton"                  
+[7] "window_screen_area_recommended_sqft" "long"                                "recommended_additional_r_value"     
+Number of terminal nodes:  18 
+Residual mean deviance:  45.92 = 345600 / 7526 
+Distribution of residuals:
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-27.5700  -4.6300  -0.3011   0.0000   3.7370  65.5300 
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ ., data = train, mindev = 0.001, 
+    minsize = 1000)
+Variables actually used in tree construction:
+[1] "needs_duct_fixed"                    "attic_r_value"                       "duct_system_1_r_value"              
+[4] "attic_sqft"                          "system_1_sqft_ton"                   "window_screen_area_recommended_sqft"
+Number of terminal nodes:  10 
+Residual mean deviance:  47.23 = 355800 / 7534 
+Distribution of residuals:
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-18.0200  -4.6300  -0.3011   0.0000   3.6990  65.5300 
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ ., data = train, mindev = 0.001, 
+    minsize = 2000)
+Variables actually used in tree construction:
+[1] "needs_duct_fixed"      "attic_r_value"         "duct_system_1_r_value" "attic_sqft"           
+Number of terminal nodes:  6 
+Residual mean deviance:  48.36 = 364500 / 7538 
+Distribution of residuals:
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-15.0200  -4.9610  -0.4301   0.0000   3.8450  63.8500 
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ ., data = train, mindev = 0.001, 
+    minsize = 2000)
+Variables actually used in tree construction:
+[1] "needs_duct_fixed"      "attic_r_value"         "duct_system_1_r_value" "attic_sqft"           
+Number of terminal nodes:  6 
+Residual mean deviance:  48.36 = 364500 / 7538 
+Distribution of residuals:
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-15.0200  -4.9610  -0.4301   0.0000   3.8450  63.8500 
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ ., data = train, mindev = 0.001, 
+    minsize = 5000)
+Variables actually used in tree construction:
+[1] "needs_duct_fixed" "attic_r_value"   
+Number of terminal nodes:  3 
+Residual mean deviance:  49.18 = 370800 / 7541 
+Distribution of residuals:
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-14.5700  -5.0580  -0.1749   0.0000   3.9250  63.8500 
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ system_1_location_air_handler + 
+    system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton, 
+    data = train, mindev = 0.001, minsize = 5000)
+Variables actually used in tree construction:
+[1] "system_1_age_years"
+Number of terminal nodes:  2 
+Residual mean deviance:  118.4 = 892800 / 7542 
+Distribution of residuals:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+-18.450  -7.316  -2.110   0.000   3.971  81.460 
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ system_1_location_air_handler + 
+    system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton, 
+    data = train, mindev = 0.001, minsize = 10)
+Variables actually used in tree construction:
+[1] "system_1_age_years" "system_1_sqft_ton" 
+Number of terminal nodes:  4 
+Residual mean deviance:  117.9 = 888900 / 7540 
+Distribution of residuals:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+-26.930  -7.346  -2.246   0.000   3.854  81.550 
+
+Regression tree:
+tree(formula = duct_system_1_leakage ~ system_1_location_air_handler + 
+    system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton, 
+    data = train, mindev = 0.001, minsize = 5)
+Variables actually used in tree construction:
+[1] "system_1_age_years" "system_1_sqft_ton" 
+Number of terminal nodes:  5 
+Residual mean deviance:  117.6 = 886900 / 7539 
+Distribution of residuals:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+-18.360  -7.346  -2.246   0.000   3.854  81.550 
+Error in prune.tree(list(frame = list(var = 1L, n = 6792, dev = 789130.57249855,  : 
+  can not prune singlenode tree
+ [1] "x1"                                  "tcad_or_wcad_property_id_s"         
+ [3] "duct_system_1_type"                  "duct_system_1_r_value"              
+ [5] "duct_system_1_return_sizing"         "duct_system_1_leakage"              
+ [7] "system_1_location_air_handler"       "system_1_air_handler_type"          
+ [9] "system_1_age_years"                  "system_1_sqft_ton"                  
+[11] "water_heater_fuel_type"              "water_heating_tank_type"            
+[13] "toilet_type"                         "programmable_thermostat_present"    
+[15] "window_screen_area_recommended_sqft" "furnace_fuel_type"                  
+[17] "attic_r_value"                       "recommended_additional_r_value"     
+[19] "year_built"                          "bedrooms"                           
+[21] "conditioned_sqft"                    "attic_sqft"                         
+[23] "home_type"                           "lat"                                
+[25] "long"                                "set"                                
+[27] "needs_duct_fixed"                   

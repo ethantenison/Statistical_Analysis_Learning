@@ -339,7 +339,7 @@ ggsave("MapNotNeedsDuctFixedDensMap100Dens.png", NotNeedsDuctFixedDensMap100Dens
 library(janitor)
 library(dplyr)
 library(readr)
-df <- read_csv("assignment5_q2_cleaned.csv")
+df <- read.csv("assignment5_q2_cleaned.csv", stringsAsFactors = TRUE)
 df <- clean_names(df)
 df <- na.omit(df)
 train <- dplyr::filter(df, set == "train")
@@ -350,8 +350,8 @@ test <- dplyr::filter(df, set == "test")
 
 library(tree)
 
-mod.tree <- tree(duct_system_1_leakage ~ system_1_location_air_handler + system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton,
-                 data = train, mindev = 0.001, minsize = 5 )
+mod.tree <- tree(duct_system_1_leakage ~ system_1_location_air_handler + system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton + duct_system_1_type + conditioned_sqft, data = train, mindev = 0.001, minsize = 10 )
+
 
 summary(mod.tree)
 
@@ -364,6 +364,28 @@ text(mod.tree, pretty = 0)
 
 ### (b) Use cross validation to prune the tree. What is the best size? Print the pruned tree. Interpret the pruned tree. How would you use this to inform targeting weatherization resources to those that need them?
 <br/>
+
+
+```{r tree_pruning}
+### Prune tree with CV ###
+
+#Find the best size of the tree - the point where deviance(dev) is lowest
+mod.tree.cv <- cv.tree(mod.tree, FUN = prune.tree)
+mod.tree.cv
+
+plot(mod.tree.cv$size, mod.tree.cv$dev, type = "b")
+#Seems like best size of the tree is 2 - lets use this to prune the tree
+
+mod.tree.prune <- prune.tree(mod.tree, best = 5)
+
+summary(mod.tree.prune)
+
+plot(mod.tree.prune)
+text(mod.tree.prune, pretty = 0)
+
+
+
+```
 
 ### (c) Suppose the top 20% of leakage need immediate attention. Predict leakage using the pruned tree and apply the classification threshold. Print the confusion matrix for the test data. Calculate and discuss the error types, rates, and consequences in the context of this problem.
 <br/>
