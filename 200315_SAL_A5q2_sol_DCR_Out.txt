@@ -1,0 +1,23 @@
+[1] "EnergyAudit data has 17311 rows with 37 columns"
+[1] "(30.281019438000442, -97.69535023399965)" "(30.240678449000484, -97.69217838499969)" "(30.29637649300048, -97.73355810199968)"  "(30.260265029000436, -97.6842653439997)" 
+[5] "(30.19278566400044, -97.82692865999968)"  "(30.145707753000465, -97.81165214599969)"
+[1] 30.28102 30.24068 30.29638 30.26027 30.19279 30.14571
+[1] 16483
+[1] 12914
+[1] 11297
+[1] "EnergyAudit_clean data: Longitude Range: (-102.615466,-97.481128). Width: -5.134338"
+[1] "EnergyAudit_clean data: Latitude Range: (29.466871,31.980722). Height: -2.513851"
+[1] "Trimming map to: Latitude Range: (30.090000,30.470000),  Latitude Range: (-98.000000,-97.560000)"
+[1] "EnergyAudit_clean data now has 11281 rows with 24 columns"
+
+ test train 
+ 3405  7876 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.09   12.00   17.00   19.30   23.00  100.00 
+   
+    test train
+  0 2716  6347
+  1  689  1529
+[1] "EnergyAudit_clean densities calculated for a 100 square grid"
+[1] "EnergyAudit_clean densities standardized over 100 square grid"
+Error in expand_default(scale) : could not find function "expand_default"
