@@ -18,6 +18,11 @@
     test train
   0 2716  6347
   1  689  1529
-[1] "EnergyAudit_clean densities calculated for a 100 square grid"
-[1] "EnergyAudit_clean densities standardized over 100 square grid"
-Error in expand_default(scale) : could not find function "expand_default"
+Error in isOpen(file, "w") : invalid connection
+Error in isOpen(file, "w") : invalid connection
+In addition: Warning message:
+In if (file == "") file <- stdout() else if (is.character(file)) { :
+  the condition has length > 1 and only the first element will be used
+Error in isOpen(file, "w") : invalid connection
+Error in e1[[j]] : subscript out of bounds
+ chr [1:10813] "train" "train" "train" "test" "train" "test" "test" "train" ...

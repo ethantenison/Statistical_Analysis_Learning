@@ -209,6 +209,12 @@ EnergyAudit_clean$NeedsDuctFixed[EnergyAudit_clean$Duct.System.1.....Leakage > q
 EnergyAudit_clean$NeedsDuctFixed <- as.factor(EnergyAudit_clean$NeedsDuctFixed)
 table(EnergyAudit_clean$NeedsDuctFixed, EnergyAudit_clean$set)
 
+write.csv(EnergyAudit_clean, "assignment5_q2_cleaned.csv")
+
+```
+
+
+```{r kde}
 #---------------#
 # Get KDE
 #---------------#
@@ -331,18 +337,20 @@ ggsave("MapNotNeedsDuctFixedDensMap100Dens.png", NotNeedsDuctFixedDensMap100Dens
 
 ```{r decision_tree}
 library(janitor)
-df <- EnergyAudit_clean
+library(dplyr)
+library(readr)
+df <- read_csv("assignment5_q2_cleaned.csv")
 df <- clean_names(df)
 df <- na.omit(df)
-train <- filter(df, set == train)
-test <- filter(df, set == test)
+train <- dplyr::filter(df, set == "train")
+test <- dplyr::filter(df, set == "test")
 
 
 ### Growing a decision tree ###
 
 library(tree)
 
-mod.tree <- tree(duct_system_1_leakage ~ system_1_location_air_handler + system_1_age_years + furnance_fuel_type + home_type + system_1_sqft_ton,
+mod.tree <- tree(duct_system_1_leakage ~ system_1_location_air_handler + system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton,
                  data = train, mindev = 0.001, minsize = 5 )
 
 summary(mod.tree)
