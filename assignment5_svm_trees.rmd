@@ -35,7 +35,7 @@ sort homes that identifies those with high levels of duct leakage. Please consul
 <br/>
 
 
-```{r data_cleaning}
+```{r data_cleaning, echo=FALSE}
 
 # A5 script
 # RECS analysis file
@@ -328,6 +328,31 @@ ggsave("MapNotNeedsDuctFixedDensMap100Dens.png", NotNeedsDuctFixedDensMap100Dens
 
 ### (a) Grow a decision tree to predict System 1 Duct Leakage in the training data on the basis of the sort of simple questions you could ask someone over the phone, e.g. “Where is your system?”;“Is your furnace gas or electric?”; “What sort of home are you in?” Grow a very large tree and print it (hint: add mindev = 0.001 and minsize = 5, you may need to adjust mindev).
 <br/>
+
+```{r decision_tree}
+library(janitor)
+df <- EnergyAudit_clean
+df <- clean_names(df)
+df <- na.omit(df)
+train <- filter(df, set == train)
+test <- filter(df, set == test)
+
+
+### Growing a decision tree ###
+
+library(tree)
+
+mod.tree <- tree(duct_system_1_leakage ~ system_1_location_air_handler + system_1_age_years + furnance_fuel_type + home_type + system_1_sqft_ton,
+                 data = train, mindev = 0.001, minsize = 5 )
+
+summary(mod.tree)
+
+plot(mod.tree)
+text(mod.tree, pretty = 0)
+
+
+
+```
 
 ### (b) Use cross validation to prune the tree. What is the best size? Print the pruned tree. Interpret the pruned tree. How would you use this to inform targeting weatherization resources to those that need them?
 <br/>
