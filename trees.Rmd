@@ -110,7 +110,7 @@ plot(mod.rf)
 varImpPlot(mod.rf)
 
 #Tuning the forest to find the best m (number of candidates randomly sampled at each split)
-tuneRF(x = subset(hit2, select = -Salary), y = hit2$Salary, ntreeTry = 200, mtryStart = 1, stepFactor = 2, plot = TRUE, improve = 0.001)
+tuneRF(x = subset(hit2, select = -Salary), y = hit2$Salary, ntreeTry = 200, mtryStart = 1, stepFactor = 2, plot = TRUE, improve = 0.0001)
 
 #Use this m value to build the forest (on the training set) and predict on the test set
 mod.rf.opt <- randomForest(Salary ~., data = hit2[train,], importance = TRUE, ntree  = 100, mtry = 4)
