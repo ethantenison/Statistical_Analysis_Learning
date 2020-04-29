@@ -1,0 +1,71 @@
+---
+title: "ROC Curves"
+author: "Vivek"
+date: "4/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Clear environment
+rm(list = ls())
+
+library(tidyverse)
+library(ISLR)
+
+hit <- na.omit(Hitters)
+hit$HighSalary <- ifelse(hit$Salary>mean(hit$Salary),1,0)
+
+#Create training/test index
+set.seed(12345)
+train <- sample(c(TRUE, FALSE), nrow(hit), prob = c(0.6,0.4), replace = TRUE)
+test <- !train
+
+#Regression model with selected predictors
+m1 <- glm(HighSalary ~ CRBI + AtBat + Hits + Division, data = hit[train,], family = "binomial")
+summary(m1)
+
+pred.Salary <- predict(m1, hit[test,], type = "response")
+
+#Classify predicted salary with 3 different thresholds - 0.25, 0.5, 0.75
+pred.Salary.T0.25 <- ifelse(pred.Salary>0.25, 1, 0)
+pred.Salary.T0.50 <- ifelse(pred.Salary>0.50, 1, 0)
+pred.Salary.T0.75 <- ifelse(pred.Salary>0.75, 1, 0)
+
+#Confusion Matrices for test data
+SalaryClass.test <- hit[test, "HighSalary"]
+table(TrueClass = SalaryClass.test, PredClass = pred.Salary.T0.25) #Expect more false positives
+table(TrueClass = SalaryClass.test, PredClass = pred.Salary.T0.50)
+table(TrueClass = SalaryClass.test, PredClass = pred.Salary.T0.75) #Expect more false negatives
+
+#Plot ROC curve and mark the 3 thresholds
+library(pROC)
+
+r1 <- roc(SalaryClass.test ~ pred.Salary)
+plot(r1, legacy.axes = TRUE, print.thres = c(0.25,0.5,0.75), xlab = "False Positive Rate", ylab = "True Positive Rate") #Check error rates at selected thresholds
+plot(r1, legacy.axes = TRUE, print.thres = "best", xlab = "False Positive Rate", ylab = "True Positive Rate") #Get the optimal threshold to minimize both types of errors
+
+
+# Let us try a different (simpler) regression model
+m2 <- glm(HighSalary ~ Runs + Years, data = hit[train,], family = "binomial")
+pred.Salary2 <- predict(m2, hit[test,], type = "response")
+r2 <- roc(SalaryClass.test ~ pred.Salary2)
+
+# Let us also try a model with all predictors
+m3 <- glm(HighSalary ~ .-Salary, data = hit[train,], family = "binomial")
+pred.Salary3 <- predict(m3, hit[test,], type = "response")
+r3 <- roc(SalaryClass.test ~ pred.Salary3)
+
+#Plot ROC for all the models
+plot(r1, legacy.axes = TRUE, xlab = "False Positive Rate", ylab = "True Positive Rate")
+plot(r2, add = TRUE, col = "blue")
+plot(r3, add = TRUE, col = "red")
+
+#Which model would you choose based on the ROC plots, and why?
+#Which model would you not choose based on the ROC plots, and why not?
+
+```
+

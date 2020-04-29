@@ -350,8 +350,9 @@ test <- dplyr::filter(df, set == "test")
 
 library(tree)
 
-mod.tree <- tree(duct_system_1_leakage ~ system_1_location_air_handler + system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton + duct_system_1_type + conditioned_sqft, data = train, mindev = 0.001, minsize = 10 )
+mod.tree <- tree(duct_system_1_leakage ~ system_1_location_air_handler + system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton +  conditioned_sqft, data = train, mindev = 0.001, minsize = 10 )
 
+#duct_system_1_type + took this out because it's hard to see XD
 
 summary(mod.tree)
 
@@ -376,7 +377,7 @@ mod.tree.cv
 plot(mod.tree.cv$size, mod.tree.cv$dev, type = "b")
 #Seems like best size of the tree is 2 - lets use this to prune the tree
 
-mod.tree.prune <- prune.tree(mod.tree, best = 5)
+mod.tree.prune <- prune.tree(mod.tree, best = 3)
 
 summary(mod.tree.prune)
 
