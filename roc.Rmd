@@ -45,6 +45,8 @@ table(TrueClass = SalaryClass.test, PredClass = pred.Salary.T0.75) #Expect more 
 library(pROC)
 
 r1 <- roc(SalaryClass.test ~ pred.Salary)
+
+plot(r1, legacy.axes = TRUE,  xlab = "False Positive Rate", ylab = "True Positive Rate") #Check error rates at selected thresholds
 plot(r1, legacy.axes = TRUE, print.thres = c(0.25,0.5,0.75), xlab = "False Positive Rate", ylab = "True Positive Rate") #Check error rates at selected thresholds
 plot(r1, legacy.axes = TRUE, print.thres = "best", xlab = "False Positive Rate", ylab = "True Positive Rate") #Get the optimal threshold to minimize both types of errors
 
@@ -65,7 +67,8 @@ plot(r2, add = TRUE, col = "blue")
 plot(r3, add = TRUE, col = "red")
 
 #Which model would you choose based on the ROC plots, and why?
+#which ever one maximizes the area under the curve
 #Which model would you not choose based on the ROC plots, and why not?
-
+#You would not want the blue curve because you have less area under the curve.
 ```
 
