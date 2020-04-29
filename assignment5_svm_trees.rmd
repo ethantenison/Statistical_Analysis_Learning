@@ -342,15 +342,19 @@ library(readr)
 df <- read.csv("assignment5_q2_cleaned.csv", stringsAsFactors = TRUE)
 df <- clean_names(df)
 df <- na.omit(df)
-train <- dplyr::filter(df, set == "train")
-test <- dplyr::filter(df, set == "test")
+df$leakageClass <- ifelse(df$duct_system_1_leakage > quantile(df$duct_system_1_leakage, probs = 0.8), "High", "Low")
+### Split data into traiing/test index ###
+set.seed(1234)
+train <- sample(c(TRUE,FALSE), nrow(df), rep=TRUE, prob = c(0.6,0.4))
+test <- (!train)
+df_train <- df[train,]
 
 
 ### Growing a decision tree ###
 
 library(tree)
 
-mod.tree <- tree(duct_system_1_leakage ~ system_1_location_air_handler + system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton +  conditioned_sqft, data = train, mindev = 0.001, minsize = 10 )
+mod.tree <- tree(duct_system_1_leakage ~ system_1_location_air_handler + system_1_age_years + furnace_fuel_type + home_type + system_1_sqft_ton +  conditioned_sqft, data = df_train, mindev = 0.001, minsize = 10 )
 
 #duct_system_1_type + took this out because it's hard to see XD
 
@@ -358,10 +362,10 @@ summary(mod.tree)
 
 plot(mod.tree)
 text(mod.tree, pretty = 0)
-
-
-
 ```
+
+
+
 
 ### (b) Use cross validation to prune the tree. What is the best size? Print the pruned tree. Interpret the pruned tree. How would you use this to inform targeting weatherization resources to those that need them?
 <br/>
@@ -375,7 +379,7 @@ mod.tree.cv <- cv.tree(mod.tree, FUN = prune.tree)
 mod.tree.cv
 
 plot(mod.tree.cv$size, mod.tree.cv$dev, type = "b")
-#Seems like best size of the tree is 2 - lets use this to prune the tree
+#Seems like best size of the tree is 3 - lets use this to prune the tree
 
 mod.tree.prune <- prune.tree(mod.tree, best = 3)
 
@@ -385,15 +389,38 @@ plot(mod.tree.prune)
 text(mod.tree.prune, pretty = 0)
 
 
+```
+
+
+### (c) Suppose the top 20% of leakage need immediate attention. Predict leakage using the pruned tree and apply the classification threshold. Print the confusion matrix for the test data. Calculate and discuss the error types, rates, and consequences in the context of this problem.### 
+<br/>
+
+
+```{r leakage_threshold}
+
+### Predict salary, using the pruned tree ###
+df$leakage.Pred <- predict(mod.tree.prune, newdata = df)
+#Reapply 20% classification threshold for predicted salary
+df$leakage.Pred.Class <- ifelse(df$leakage.Pred > quantile(df$leakage.Pred, probs = 0.8), "High", "Low")
+table(df$leakage.Pred.Class)
+
+### Confusion matrix ###
+
+#For training set
+print("Train set")
+table(TrueLeakage = df$leakageClass[train], Predleakage = df$leakage.Pred.Class[train]) #How many instances were misclassified? Error rates?
+#For test set
+print("Test set")
+table(TrueLeakage = df$leakageClass[test], Predleakage = df$leakage.Pred.Class[test]) #How many instances were misclassified? Error rates?
+
 
 ```
 
-### (c) Suppose the top 20% of leakage need immediate attention. Predict leakage using the pruned tree and apply the classification threshold. Print the confusion matrix for the test data. Calculate and discuss the error types, rates, and consequences in the context of this problem.
+### (d) Comment on the “interestingness” of your findings. Identify the audience for
+these findings. Craft a concise message to convey these findings in as interesting a way as you can. 
 <br/>
 
-### (d) Comment on the “interestingness” of your findings. Identify the audience for these findings. Craft a concise message to convey these findings in as interesting a way as you can. 
-<br/>
-
+Train: true positive rate of .09%, 
 
 # Q3: Unsupervised learning in simulated data (40 points)
 Often patterns in data manifest as self-similar groups of observations, but the labels of the groups and
@@ -401,14 +428,14 @@ the actual group membership – in a sense, the reason that the groups are self-
 the SAL_A5q3 data generation script to generate 100 observations with 4 groups and 2 features; this is
 the n100g4p2 dataset. 
 
-# (a) Plot the data x=X1, y=X2, and color=truecluster. Comment on any true cluster that you think may be easier or more difficult to identify. Comment on any specific observations that are likely to be misidentified.
+### (a) Plot the data x=X1, y=X2, and color=truecluster. Comment on any true cluster that you think may be easier or more difficult to identify. Comment on any specific observations that are likely to be misidentified.
 <br/>
 
-# (b) Perform kmeans clustering for k=2:7. Plot your results with x=X1, y=X2, and color=cluster; display them in a single figure with 6 panes (hint: use grid.arrange() in the gridExtra package). Comment on the relationship between the clusters identified and what you know to be the true group membership. Without knowing the true group membership, which values of k do you prefer and why? Which values of k do you not prefer and why?
+### (b) Perform kmeans clustering for k=2:7. Plot your results with x=X1, y=X2, and color=cluster; display them in a single figure with 6 panes (hint: use grid.arrange() in the gridExtra package). Comment on the relationship between the clusters identified and what you know to be the true group membership. Without knowing the true group membership, which values of k do you prefer and why? Which values of k do you not prefer and why?
 <br/>
 
-# (c) Perform hierarchical clustering with complete linkage; print the dendrogram. Cut the tree to obtain cluster assignments for 2-7 clusters. Plot your results in a single figure with 6 panes.Comment on these clusters with respect to kmeans clustering and the true group membership. Which cut levels do you prefer and why? Which cut levels do you not prefer and why?
+### (c) Perform hierarchical clustering with complete linkage; print the dendrogram. Cut the tree to obtain cluster assignments for 2-7 clusters. Plot your results in a single figure with 6 panes.Comment on these clusters with respect to kmeans clustering and the true group membership. Which cut levels do you prefer and why? Which cut levels do you not prefer and why?
 <br/>
 
-# (d) Perform hierarchical clustering with average and single linkage; print the dendrograms, cut the trees to obtain cluster assignments for 2-7 clusters, and plot your results in a single figure with 6 panes. Comment on the various clustering methods you’ve used; which method(s) do you prefer and why? Which method(s) do you not prefer and why?
+### (d) Perform hierarchical clustering with average and single linkage; print the dendrograms, cut the trees to obtain cluster assignments for 2-7 clusters, and plot your results in a single figure with 6 panes. Comment on the various clustering methods you’ve used; which method(s) do you prefer and why? Which method(s) do you not prefer and why?
 <br/>
