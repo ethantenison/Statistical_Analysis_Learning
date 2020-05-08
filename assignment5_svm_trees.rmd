@@ -428,14 +428,219 @@ the actual group membership – in a sense, the reason that the groups are self-
 the SAL_A5q3 data generation script to generate 100 observations with 4 groups and 2 features; this is
 the n100g4p2 dataset. 
 
+```{r}
+# RECS analysis file
+# D. Cale Reeves
+# UT Austin, LBJ School
+# SAL2020
+# Created: 2020/03/15
+#
+# 
+
+#---------------#
+# Run Parameters 
+#---------------#
+options("width"=180)
+
+OutFile <- file("200315_SAL_A5q3_sol_DCR_Out.txt")
+
+#set.seed(8675309)
+
+#setwd("/Users/dcr953/Desktop/Box Sync/Teaching/20_Spring/SAL/Assignments/A5")
+
+#---------------#
+# Libraries
+#---------------#
+
+library(MASS)
+library(ggplot2)
+library(stats)
+library(gridExtra)
+
+#---------------#
+# Make Data
+#---------------#
+set.seed(28)
+
+data_gen <- function (n, k, p) {
+	simX <<- data.frame(ID=seq(1:n))
+	simX$truecluster <<- as.factor(sample(seq(1:k), n, replace = TRUE))
+	simX_tmp <<- NULL
+	sapply(seq(1:k), function (i) {	
+		temp_p <- qr.Q(qr(matrix(rnorm(p^2), p)))
+		Sigma_k <- abs(crossprod(temp_p, temp_p*(p:1)))
+		simX_tmp_k <<- as.data.frame(mvrnorm(n=nrow(simX[simX$truecluster == i,]), mu=runif(p, min = 0, max = 10), Sigma=Sigma_k))
+		colnames(simX_tmp_k) <<- paste0("X", seq(1:p))
+		simX_tmp_k$ID <<- simX$ID[simX$truecluster == i]
+		simX_tmp <<- rbind(simX_tmp, simX_tmp_k)	
+	})
+	simData <<- merge(simX, simX_tmp, by="ID")
+}
+
+data_gen(100, 4, 2)
+excludes <- names(simData) %in% c("ID","truecluster") 
+
+simData[!excludes]
+
+
+
+```
+
 ### (a) Plot the data x=X1, y=X2, and color=truecluster. Comment on any true cluster that you think may be easier or more difficult to identify. Comment on any specific observations that are likely to be misidentified.
 <br/>
+
+Without a doubt, differentiating between cluster 1 and 3 will be the most difficult. 
+```{r plot}
+
+ggplot(simData, aes(x=X1, y=X2)) +
+        geom_point(aes(color=truecluster))
+
+
+simData <- dplyr::select(simData, -c(truecluster, ID))     
+simData <- scale(simData)
+simData <- as_tibble(simData)
+```
+
 
 ### (b) Perform kmeans clustering for k=2:7. Plot your results with x=X1, y=X2, and color=cluster; display them in a single figure with 6 panes (hint: use grid.arrange() in the gridExtra package). Comment on the relationship between the clusters identified and what you know to be the true group membership. Without knowing the true group membership, which values of k do you prefer and why? Which values of k do you not prefer and why?
 <br/>
 
+4 kmeans seems to do a pretty good job. Not knowing the true identity though, I would have gone with 5 kmeans because there is significant overlap between the original 2 and 3.I really do not like the 2nd and 6th kmeans. The 2nd shows barely any information, and the 6ths is too confusing.  
+```{r kmeans}
+
+library(stats)
+library(factoextra)
+library(dplyr)
+library(ggplot2)
+library(cluster)
+
+cl2 <- kmeans(simData, 2, nstart = 25)
+cl3 <- kmeans(simData, 3, nstart = 25)
+cl4 <- kmeans(simData, 4, nstart = 25)
+cl5 <- kmeans(simData, 5, nstart = 25)
+cl6 <- kmeans(simData, 6, nstart = 25)
+cl7 <- kmeans(simData, 7, nstart = 25)
+
+df_km <- simData %>%
+   as_tibble() %>%
+   mutate(cluster2 = cl2$cluster,cluster3 = cl3$cluster, cluster4 = cl4$cluster, cluster5 = cl5$cluster, cluster6 = cl6$cluster, cluster7 = cl7$cluster) 
+
+cols <- c("cluster2", "cluster3", "cluster4", "cluster5","cluster6", "cluster7")
+
+df_km[cols] <- lapply(df_km[cols], factor)
+
+km2_plot <- ggplot(data= df_km, aes(x=X1, y=X2, color=cluster2)) + geom_point()
+km3_plot <- ggplot(data= df_km, aes(x=X1, y=X2, color=cluster3)) + geom_point()
+km4_plot <- ggplot(data= df_km, aes(x=X1, y=X2, color=cluster4)) + geom_point()
+km5_plot <- ggplot(data= df_km, aes(x=X1, y=X2, color=cluster5))+ geom_point()
+km6_plot <- ggplot(data= df_km, aes(x=X1, y=X2, color=cluster6))+ geom_point()
+km7_plot <- ggplot(data= df_km, aes(x=X1, y=X2, color=cluster7))+ geom_point()
+
+library(gridExtra)
+print("Kmeans")
+grid.arrange(km2_plot, km3_plot, km4_plot, km5_plot, km6_plot, km7_plot)
+
+
+
+```
 ### (c) Perform hierarchical clustering with complete linkage; print the dendrogram. Cut the tree to obtain cluster assignments for 2-7 clusters. Plot your results in a single figure with 6 panes.Comment on these clusters with respect to kmeans clustering and the true group membership. Which cut levels do you prefer and why? Which cut levels do you not prefer and why?
 <br/>
 
+
+Using this random dataset, it appears that kmeans is better at separating the true 4 groups.This might be because the groups are already rather spherical, and we're only using two dimensions. If we had many more dimensions, perhaps hierarchical clustering would do a better job. Using this method, I like cutting the dendrogram at 6 groups because it's the maximum that still shows rather distinct groups. Any higher than that and it starts to look discombobulated.  
+```{r hierarchical_clustering_complete}
+df_hc <- simData
+
+dist_mat <- dist(df_hc, method = 'euclidean')
+
+hc_complete <- hclust(dist_mat, method = 'complete')
+
+print(plot(hc_complete,main="Complete Linkage", xlab="", sub="",cex =.9))
+
+df_hc$hc2 <- as.factor(cutree(hc_complete, 2))
+df_hc$hc3 <- as.factor(cutree(hc_complete, 3))
+df_hc$hc4 <- as.factor(cutree(hc_complete, 4))
+df_hc$hc5 <- as.factor(cutree(hc_complete, 5))
+df_hc$hc6 <- as.factor(cutree(hc_complete, 6))
+df_hc$hc7 <- as.factor(cutree(hc_complete, 7))
+
+hc2_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc2))+geom_point()
+hc3_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc3))+geom_point()
+hc4_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc4))+geom_point()
+hc5_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc5))+geom_point()
+hc6_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc6))+geom_point()
+hc7_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc7))+geom_point()
+
+print("Hierarchical_complete")
+grid.arrange(hc2_plot, hc3_plot, hc4_plot, hc5_plot, hc6_plot, hc7_plot)
+
+
+```
+
 ### (d) Perform hierarchical clustering with average and single linkage; print the dendrograms, cut the trees to obtain cluster assignments for 2-7 clusters, and plot your results in a single figure with 6 panes. Comment on the various clustering methods you’ve used; which method(s) do you prefer and why? Which method(s) do you not prefer and why?
 <br/>
+
+The single linkage does a poor job in this situation. The only plot that shows distinct groups is at two clusters. Maybe the single linkage is a good method if you expect to see several distinct outliers. Otherwise, I don't know why you would want to use it. 
+<br/>
+
+
+The average method produces plots similar to kmeans, which makes sense because they're both using averages. In my mind, kmeans, average hier., and complet hier. are prefered methods. Obviously, you would want to run cross validation to see which one is actually better. If you don't know the actual shape of your data, which one you choose might depend on your prior knowledge.  
+
+```{r hierarchical_clustering_average}
+df_hc <- simData
+
+dist_mat <- dist(df_hc, method = 'euclidean')
+
+hc_complete <- hclust(dist_mat, method = 'average')
+
+print(plot(hc_complete,main="Complete Linkage", xlab="", sub="",cex =.9))
+
+df_hc$hc2 <- as.factor(cutree(hc_complete, 2))
+df_hc$hc3 <- as.factor(cutree(hc_complete, 3))
+df_hc$hc4 <- as.factor(cutree(hc_complete, 4))
+df_hc$hc5 <- as.factor(cutree(hc_complete, 5))
+df_hc$hc6 <- as.factor(cutree(hc_complete, 6))
+df_hc$hc7 <- as.factor(cutree(hc_complete, 7))
+
+hc2_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc2))+geom_point()
+hc3_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc3))+geom_point()
+hc4_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc4))+geom_point()
+hc5_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc5))+geom_point()
+hc6_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc6))+geom_point()
+hc7_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc7))+geom_point()
+
+print("Hierarchical_average")
+grid.arrange(hc2_plot, hc3_plot, hc4_plot, hc5_plot, hc6_plot, hc7_plot)
+
+
+```
+
+
+```{r hierarchical_clustering_single}
+df_hc <- simData
+
+dist_mat <- dist(df_hc, method = 'euclidean')
+
+hc_complete <- hclust(dist_mat, method = 'single')
+
+print(plot(hc_complete,main="Complete Linkage", xlab="", sub="",cex =.9))
+
+df_hc$hc2 <- as.factor(cutree(hc_complete, 2))
+df_hc$hc3 <- as.factor(cutree(hc_complete, 3))
+df_hc$hc4 <- as.factor(cutree(hc_complete, 4))
+df_hc$hc5 <- as.factor(cutree(hc_complete, 5))
+df_hc$hc6 <- as.factor(cutree(hc_complete, 6))
+df_hc$hc7 <- as.factor(cutree(hc_complete, 7))
+
+hc2_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc2))+geom_point()
+hc3_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc3))+geom_point()
+hc4_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc4))+geom_point()
+hc5_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc5))+geom_point()
+hc6_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc6))+geom_point()
+hc7_plot <- ggplot(data= df_hc, aes(x=X1, y=X2, color=hc7))+geom_point()
+
+print("Hierarchical_single")
+grid.arrange(hc2_plot, hc3_plot, hc4_plot, hc5_plot, hc6_plot, hc7_plot)
+
+
+```
